@@ -12,24 +12,19 @@ public class UserConstant {
     public static final int USER_PAGE_SIZE = 10;
 
     /**
-     * 默认权限 => 普通用户
+     * 默认角色
      */
-    public static final  int DEFAULT_ROLE= 0;
+    public static final  String DEFAULT_ROLE = "user";
 
     /**
-     * 管理员权限
+     * 管理员角色
      */
-    public static final  int ADMIN_ROLE= 1;
+    public static final  String ADMIN_ROLE = "admin";
 
     /**
-     * 普通用户
+     * 被封号
      */
-    public static final String DEFAULT_USER="0";
-
-    /**
-     * 管理员
-     */
-    public static final String ADMIN_USER="1";
+    public static final  String BAN_ROLE = "ban";
 
 
     /**

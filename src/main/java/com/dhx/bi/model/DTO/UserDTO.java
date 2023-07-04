@@ -32,6 +32,6 @@ public class UserDTO implements Serializable {
     /**
      * 用户角色
      */
-    private Integer userRole;
+    private String userRole;
 
 }

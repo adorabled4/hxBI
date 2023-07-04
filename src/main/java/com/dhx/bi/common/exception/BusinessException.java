@@ -18,7 +18,7 @@ public class BusinessException extends RuntimeException{
     private int code=500;
 
 
-    private String message;
+    private String message="error";
     /**
      * 错误描述
      */

@@ -8,13 +8,16 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.dhx.bi.common.BaseResponse;
 import com.dhx.bi.common.ErrorCode;
+import com.dhx.bi.common.constant.UserConstant;
 import com.dhx.bi.model.DO.UserEntity;
 import com.dhx.bi.model.DTO.JwtToken;
+import com.dhx.bi.model.DTO.UserDTO;
 import com.dhx.bi.model.VO.UserVO;
 import com.dhx.bi.service.JwtTokensService;
 import com.dhx.bi.service.UserService;
 import com.dhx.bi.mapper.UserMapper;
 import com.dhx.bi.utils.ResultUtil;
+import com.dhx.bi.utils.UserHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -126,6 +129,30 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity>
         user.setUserPassword(handlerPassword);
         save(user);
         return ResultUtil.success(user.getUserId());
+    }
+
+    @Override
+    public UserEntity getLoginUser(HttpServletRequest request) {
+        UserDTO user = UserHolder.getUser();
+        Long userId = user.getUserId();
+        return getById(userId);
+    }
+
+    @Override
+    public boolean isAdmin(HttpServletRequest request) {
+        UserDTO user = UserHolder.getUser();
+        if(user.getUserRole()==null){
+            return false;
+        }
+        return user.getUserRole().equals(UserConstant.ADMIN_ROLE) ;
+    }
+
+    @Override
+    public boolean isAdmin(UserEntity user) {
+        if(user.getUserRole()==null){
+            return false;
+        }
+        return user.getUserRole().equals(UserConstant.ADMIN_ROLE) ;
     }
 }
 

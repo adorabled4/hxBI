@@ -11,9 +11,13 @@ public enum ErrorCode {
     PARAMS_ERROR(400,"error","请求参数错误"),
     NULL_ERROR(400,"error","请求数据为空"),
     NOT_LOGIN(401,"error","未登录"),
-    NO_AUTH(403,"error","无权限"),
+    NO_AUTH_ERROR(403,"error","无权限"),
     SYSTEM_ERROR(500,"error","服务器内部异常"),
     NOT_FOUND(404,"error","访问路径错误"),
+    OPERATION_ERROR(50001, "error","操作失败"),
+    NOT_FOUND_ERROR(40400, "error","请求数据不存在"),
+    TOO_MANY_REQUEST(42900,"error" ,"请求过于频繁"),
+    FORBIDDEN_ERROR(40300,"error" ,"禁止访问"),
     ;
     final int code;
     final String message;

@@ -29,11 +29,12 @@ public class MvcConfig implements WebMvcConfigurer {
         //注意不要拦截knife4j的接口文档
         registry.addInterceptor(new ReFreshTokenInterceptor(stringRedisTemplate,jwtTokensService)).addPathPatterns("/**")
                 .excludePathPatterns(
-                        "/**/login",
+                        "/**/user/login",
                         "/**/register",
                         "/**/doc.html/**",
                         "/static/**",
                         "/**/swagger-ui.html/**",
+                        "/**/error",
                         "/**/favicon.ico",
                         "/**/swagger-resources/**",
                         "/**/webjars/**"

@@ -32,7 +32,10 @@ public class BaseResponse<T> implements Serializable {
     }
 
     public BaseResponse(int code, T data, String description) {
-        this(code, data, "", description);
+        if(code!=200){
+            new BaseResponse<>(code, data, "error", description);
+        }
+        new BaseResponse<>(code, data, "ok", description);
     }
 
     public BaseResponse(ErrorCode errorCode) {

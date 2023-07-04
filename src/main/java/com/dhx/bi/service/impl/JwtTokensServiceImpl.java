@@ -77,7 +77,7 @@ public class JwtTokensServiceImpl implements JwtTokensService {
             String userName = claims.getSubject();
             String userId = getUserIdFromToken(token);
             String avatarUrl = (String) claims.get("avatarUrl") ;
-            Integer userRole = (Integer) claims.get("userRole") ;
+            String userRole =  (String) claims.get("userRole") ;
             String key = ACCESS_TOKEN_PREFIX + userId;
             String storedToken = stringRedisTemplate.opsForValue().get(key);
 

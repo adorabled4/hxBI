@@ -39,4 +39,28 @@ public interface UserService extends IService<UserEntity> {
      * @return 返回token
      */
     BaseResponse login(String userAccount, String password, HttpServletRequest request);
+
+    /**
+     * 获取当前登录用户
+     * @param request
+     * @return
+     */
+    UserEntity getLoginUser(HttpServletRequest request);
+
+    /**
+     * 是否是admin
+     *
+     * @param request 请求
+     * @return boolean
+     */
+    boolean isAdmin(HttpServletRequest request);
+
+
+    /**
+     * 是管理
+     *
+     * @param user 用户
+     * @return boolean
+     */
+    boolean isAdmin(UserEntity user);
 }

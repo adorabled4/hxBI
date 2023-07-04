@@ -80,14 +80,14 @@ public class UserEntity implements Serializable {
     /**
      * 是否是管理员
      */
-    private Integer userRole;
+    private String userRole;
 
     /**
      * 出生日期
      */
     private Date birth;
 
-    public UserEntity(Long userId, String userName, String avatarUrl, Integer userRole) {
+    public UserEntity(Long userId, String userName, String avatarUrl, String userRole) {
         this.userId = userId;
         this.userName = userName;
         this.avatarUrl = avatarUrl;

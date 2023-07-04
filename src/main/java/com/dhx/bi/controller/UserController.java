@@ -29,7 +29,7 @@ import java.util.List;
  **/
 @RestController
 @RequestMapping("/user")
-@Api(tags = "用户相关接口")
+@Api()
 public class UserController {
 
     @Autowired
@@ -45,7 +45,7 @@ public class UserController {
         String userName = param.getUserAccount();
         String password = param.getPassword();
         if(password==null ||userName==null){
-            return ResultUtil.error(ErrorCode.NULL_ERROR);
+            return ResultUtil.error(ErrorCode.NULL_ERROR,"用户未注册!");
         }
         return userService.login(userName,password,request);
     }
@@ -82,7 +82,7 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     @ApiOperation("通过ID删除用户")
-    @AuthCheck(mustRole =UserConstant.ADMIN_USER)
+    @AuthCheck(mustRole =UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> deleteUserById(@PathVariable("id") Long userId){
         if(userId==null || userId<0){
             return ResultUtil.error(ErrorCode.PARAMS_ERROR);
@@ -93,7 +93,7 @@ public class UserController {
 
     @PostMapping("/add")
     @ApiOperation("添加用户")
-    @AuthCheck(mustRole =UserConstant.ADMIN_USER)
+    @AuthCheck(mustRole =UserConstant.ADMIN_ROLE)
     public BaseResponse addUser(@RequestBody UserEntity userVO){
         if(userVO==null){
             return ResultUtil.error(ErrorCode.PARAMS_ERROR);
@@ -103,7 +103,6 @@ public class UserController {
 
     @PostMapping("/update")
     @ApiOperation("更新用户")
-    @AuthCheck(anyRole = {UserConstant.DEFAULT_USER,UserConstant.ADMIN_USER})
     public BaseResponse updateUserInfo(@RequestBody UserVO userVO){
         if(userVO==null){
             return ResultUtil.error(ErrorCode.PARAMS_ERROR);
@@ -114,7 +113,6 @@ public class UserController {
 
     @GetMapping("/current")
     @ApiOperation("获取当前用户信息")
-    @AuthCheck(anyRole = {UserConstant.DEFAULT_USER,UserConstant.ADMIN_USER})
     public BaseResponse<UserVO> currentUser(){
         UserDTO user = UserHolder.getUser();
         UserEntity userEntity = userService.getById(user.getUserId());
