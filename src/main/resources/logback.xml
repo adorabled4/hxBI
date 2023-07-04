@@ -11,8 +11,7 @@
             <level>info</level>
         </filter>
         <encoder>
-            <pattern>%date [%level] [%thread] %logger{36} [%file : %line] %msg%n
-            </pattern>
+            <pattern>%red(%d{yyyy-MM-dd HH:mm:ss}) %green([%thread]) %highlight(%-5level) %boldMagenta(%logger{10}) - %cyan(%msg%n)</pattern>
         </encoder>
     </appender>
 
@@ -28,8 +27,7 @@
             </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
         <encoder>
-            <pattern>%date [%level] [%thread] %logger{36} [%file : %line] %msg%n
-            </pattern>
+            <pattern>%date [%level] [%thread] %logger{36} [%file : %line] %msg%n</pattern>
         </encoder>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>DEBUG</level>
@@ -111,7 +109,7 @@
     </root>
 
     <!-- 指定项目中某个包，当有日志操作行为时的日志记录级别 -->
-    <logger name="com.dhx.apigateway" level="DEBUG">
+    <logger name="com.dhx.bi" level="DEBUG">
         <appender-ref ref="debug_file"/>
         <appender-ref ref="info_file"/>
         <appender-ref ref="warn_file"/>

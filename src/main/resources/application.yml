@@ -3,10 +3,10 @@ spring:
     name: springboot-template
 
   datasource:
-    url: jdbc:mysql://localhost:3306/common
-    username: root
-    password: qwer
     driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.159.134:3306/bi
+    username: root
+    password: root
 
   redis:
     # Redis服务器连接端口
@@ -60,7 +60,7 @@ knife4j:
         group-name: 开发环境
         api-rule: package
         api-rule-resources:
-          - com.dhx.template.controller
+          - com.dhx.bi.controller
 
 logging:
   config: classpath:logback.xml # 日志配置文件

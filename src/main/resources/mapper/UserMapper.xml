@@ -2,31 +2,29 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.dhx.template.mapper.UserMapper">
+<mapper namespace="com.dhx.bi.mapper.UserMapper">
 
-    <resultMap id="BaseResultMap" type="com.dhx.template.model.DO.UserEntity">
-            <id property="userId" column="user_id" jdbcType="INTEGER"/>
+    <resultMap id="BaseResultMap" type="com.dhx.bi.model.DO.UserEntity">
+            <id property="userId" column="user_id" jdbcType="BIGINT"/>
             <result property="userName" column="user_name" jdbcType="VARCHAR"/>
             <result property="userAccount" column="user_account" jdbcType="VARCHAR"/>
-            <result property="userPassword" column="user_password" jdbcType="VARCHAR"/>
-            <result property="address" column="address" jdbcType="VARCHAR"/>
             <result property="avatarUrl" column="avatar_url" jdbcType="VARCHAR"/>
             <result property="gender" column="gender" jdbcType="TINYINT"/>
+            <result property="userPassword" column="user_password" jdbcType="VARCHAR"/>
+            <result property="address" column="address" jdbcType="VARCHAR"/>
             <result property="phone" column="phone" jdbcType="VARCHAR"/>
             <result property="email" column="email" jdbcType="VARCHAR"/>
-            <result property="lastLoginIp" column="last_login_ip" jdbcType="VARCHAR"/>
+            <result property="userRole" column="user_role" jdbcType="TINYINT"/>
             <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
             <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
             <result property="isDelete" column="is_delete" jdbcType="TINYINT"/>
-            <result property="userRole" column="user_role" jdbcType="TINYINT"/>
-            <result property="birth" column="birth" jdbcType="TIMESTAMP"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         user_id,user_name,user_account,
-        user_password,address,avatar_url,
-        gender,phone,email,
-        last_login_ip,create_time,update_time,
-        is_delete,user_role,birth
+        avatar_url,gender,user_password,
+        address,phone,email,
+        user_role,create_time,update_time,
+        is_delete
     </sql>
 </mapper>
