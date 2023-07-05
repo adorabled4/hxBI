@@ -11,7 +11,7 @@ import com.dhx.bi.common.ErrorCode;
 import com.dhx.bi.common.constant.UserConstant;
 import com.dhx.bi.model.DO.UserEntity;
 import com.dhx.bi.model.DTO.JwtToken;
-import com.dhx.bi.model.DTO.UserDTO;
+import com.dhx.bi.model.DTO.user.UserDTO;
 import com.dhx.bi.model.VO.UserVO;
 import com.dhx.bi.service.JwtTokensService;
 import com.dhx.bi.service.UserService;
@@ -19,7 +19,6 @@ import com.dhx.bi.mapper.UserMapper;
 import com.dhx.bi.utils.ResultUtil;
 import com.dhx.bi.utils.UserHolder;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;

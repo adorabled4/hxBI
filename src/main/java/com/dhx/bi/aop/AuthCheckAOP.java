@@ -2,22 +2,15 @@ package com.dhx.bi.aop;
 
 import com.dhx.bi.common.annotation.AuthCheck;
 import com.dhx.bi.common.ErrorCode;
-import com.dhx.bi.common.constant.UserConstant;
 import com.dhx.bi.common.exception.BusinessException;
 import com.dhx.bi.model.DO.UserEntity;
-import com.dhx.bi.model.DTO.UserDTO;
 import com.dhx.bi.model.enums.UserRoleEnum;
 import com.dhx.bi.service.UserService;
-import com.dhx.bi.utils.ResultUtil;
-import com.dhx.bi.utils.UserHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Pointcut;
-import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -25,7 +18,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.lang.reflect.Method;
 
 /**
  * @author adorabled4

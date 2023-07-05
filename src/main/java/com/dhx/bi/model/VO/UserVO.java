@@ -58,7 +58,7 @@ public class UserVO implements Serializable {
     /**
      * 是否是管理员
      */
-    private Integer userRole;
+    private String userRole;
 
     /**
      * 出生日期

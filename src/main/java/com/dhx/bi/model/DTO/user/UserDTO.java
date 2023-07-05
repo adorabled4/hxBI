@@ -1,4 +1,4 @@
-package com.dhx.bi.model.DTO;
+package com.dhx.bi.model.DTO.user;
 
 import lombok.Data;
 

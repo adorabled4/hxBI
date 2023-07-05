@@ -1,18 +1,17 @@
-package com.dhx.bi.model.param;
+package com.dhx.bi.model.DTO.user;
 
 import com.dhx.bi.common.constant.UserConstant;
 import lombok.Data;
 
 import javax.validation.constraints.Pattern;
 
-
 /**
  * @author adorabled4
- * @className RegisterParam
- * @date : 2023/05/04/ 16:42
+ * @className LoginParam
+ * @date : 2023/05/04/ 16:41
  **/
 @Data
-public class RegisterParam {
+public class LoginRequest {
     /**
      * 4~16位 数字,大小写字母组成
      */
@@ -26,5 +25,4 @@ public class RegisterParam {
     @Pattern(regexp = UserConstant.PASSWORD_REGEX,message = "密码不符合规范")
     private String password;
 
-    private String checkPassword;
 }

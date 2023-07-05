@@ -1,6 +1,6 @@
 package com.dhx.bi.utils;
 
-import com.dhx.bi.model.DTO.UserDTO;
+import com.dhx.bi.model.DTO.user.UserDTO;
 
 /**
  * @author adorabled4

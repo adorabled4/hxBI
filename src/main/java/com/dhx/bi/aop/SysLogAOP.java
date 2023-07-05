@@ -1,7 +1,7 @@
 package com.dhx.bi.aop;
 import com.dhx.bi.common.annotation.SysLog;
 import com.dhx.bi.common.BaseResponse;
-import com.dhx.bi.model.DTO.UserDTO;
+import com.dhx.bi.model.DTO.user.UserDTO;
 import com.dhx.bi.utils.AopUtil;
 import com.dhx.bi.utils.UserHolder;
 import lombok.Data;

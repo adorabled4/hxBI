@@ -50,7 +50,7 @@ public class UserBaseInfoVo implements Serializable {
     /**
      * 是否是管理员
      */
-    private Integer userRole;
+    private String userRole;
 
 
     private static final long serialVersionUID = 1L;

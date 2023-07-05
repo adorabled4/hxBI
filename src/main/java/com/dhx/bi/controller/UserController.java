@@ -6,10 +6,10 @@ import com.dhx.bi.common.ErrorCode;
 import com.dhx.bi.common.annotation.AuthCheck;
 import com.dhx.bi.common.constant.UserConstant;
 import com.dhx.bi.model.DO.UserEntity;
-import com.dhx.bi.model.DTO.UserDTO;
+import com.dhx.bi.model.DTO.user.UserDTO;
 import com.dhx.bi.model.VO.UserVO;
-import com.dhx.bi.model.param.LoginParam;
-import com.dhx.bi.model.param.RegisterParam;
+import com.dhx.bi.model.DTO.user.LoginRequest;
+import com.dhx.bi.model.DTO.user.RegisterRequest;
 import com.dhx.bi.service.UserService;
 import com.dhx.bi.utils.ResultUtil;
 import com.dhx.bi.utils.UserHolder;
@@ -38,20 +38,20 @@ public class UserController {
 
     @PostMapping("/login")
     @ApiOperation("用户登录")
-    public BaseResponse login(@Valid @RequestBody LoginParam param, HttpServletRequest request){
+    public BaseResponse login(@Valid @RequestBody LoginRequest param, HttpServletRequest request){
         if(param==null){
             return ResultUtil.error(ErrorCode.PARAMS_ERROR);
         }
-        String userName = param.getUserAccount();
+        String userAccount = param.getUserAccount();
         String password = param.getPassword();
-        if(password==null ||userName==null){
-            return ResultUtil.error(ErrorCode.NULL_ERROR,"用户未注册!");
+        if(password==null ||userAccount==null){
+            return ResultUtil.error(ErrorCode.PARAMS_ERROR,"用户名或密码不能为空!");
         }
-        return userService.login(userName,password,request);
+        return userService.login(userAccount,password,request);
     }
     @PostMapping("/register")
     @ApiOperation("用户注册")
-    public BaseResponse register(@Valid @RequestBody RegisterParam param){
+    public BaseResponse register(@Valid @RequestBody RegisterRequest param){
         if(param==null){
             return ResultUtil.error(ErrorCode.PARAMS_ERROR);
         }
