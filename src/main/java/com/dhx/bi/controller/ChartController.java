@@ -1,33 +1,40 @@
 package com.dhx.bi.controller;
+import java.util.Date;
 
+import cn.hutool.core.io.FileUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dhx.bi.common.BaseResponse;
 import com.dhx.bi.common.ErrorCode;
 import com.dhx.bi.common.annotation.AuthCheck;
+import com.dhx.bi.common.constant.AIConstant;
 import com.dhx.bi.common.constant.CommonConstant;
 import com.dhx.bi.common.constant.UserConstant;
 import com.dhx.bi.common.exception.BusinessException;
+import com.dhx.bi.manager.AiManager;
 import com.dhx.bi.model.DO.ChartEntity;
 import com.dhx.bi.model.DO.UserEntity;
 import com.dhx.bi.model.DTO.DeleteRequest;
-import com.dhx.bi.model.DTO.chart.ChartAddRequest;
-import com.dhx.bi.model.DTO.chart.ChartEditRequest;
-import com.dhx.bi.model.DTO.chart.ChartQueryRequest;
-import com.dhx.bi.model.DTO.chart.ChartUpdateRequest;
+import com.dhx.bi.model.DTO.chart.*;
+import com.dhx.bi.model.enums.FileUploadBizEnum;
 import com.dhx.bi.service.ChartService;
 import com.dhx.bi.service.UserService;
+import com.dhx.bi.utils.ExcelUtils;
 import com.dhx.bi.utils.ResultUtil;
 import com.dhx.bi.utils.SqlUtils;
 import com.dhx.bi.utils.ThrowUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.util.Arrays;
 
 /**
  * @author adorabled4
@@ -45,6 +52,79 @@ public class ChartController {
     @Resource
     private UserService userService;
 
+    @Resource
+    private AiManager aiManager;
+
+    @PostMapping("/gen")
+    public BaseResponse<BiResponse> getChartByAI(@RequestPart("file") MultipartFile multipartFile,
+                                                 GenChartByAIRequest chartRequest, HttpServletRequest request) {
+        // 取出数据
+        String biz = chartRequest.getBiz();
+        String chartType = chartRequest.getChartType();
+        String name = chartRequest.getName();
+        String goal = chartRequest.getGoal();
+        // 获取用户信息
+        UserEntity user = userService.getLoginUser();
+        // 校验
+        ThrowUtils.throwIf(StringUtils.isBlank(goal), ErrorCode.PARAMS_ERROR, "目标为空!");
+        ThrowUtils.throwIf(StringUtils.isNotBlank(name) && name.length() > 100, ErrorCode.PARAMS_ERROR, "名称过长!");
+        // 获取CSV
+        String csvData = ExcelUtils.excel2CSV(multipartFile);
+        // 构造用户输入
+        StringBuilder userInput = new StringBuilder("");
+        // 拼接图表类型;
+        String userGoal = goal;
+        if(StringUtils.isNotBlank(chartType)){
+            userGoal += ", 请使用 "+ chartType;
+        }
+        userInput.append("分析需求: ").append('\n');
+        userInput.append(userGoal).append("\n");
+        userInput.append("原始数据：").append("\n");
+        userInput.append(csvData).append("\n");
+
+        // 系统预设 ( 简单预设 )
+        /* 较好的做法是在系统（模型）层面做预设效果一般来说，会比直接拼接在用户消息里效果更好一些。*/
+
+        /*
+        分析需求：
+        分析网站用户的增长情况
+        原始数据：
+        日期,用户数
+        1号,10
+        2号,20
+        3号,30
+        */
+        String result = aiManager.doChat(userInput.toString(), AIConstant.BI_MODEL_ID);
+        String[] split = result.split("【【【【【");
+        // 第一个是 空字符串
+        if(split.length<3){
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"AI 生成错误!");
+        }
+        // 图表代码
+        String genChart = split[1].trim();
+        // 分析结果
+        String genResult = split[2].trim();
+        // 插入数据到数据库
+        ChartEntity chartEntity = new ChartEntity();
+        chartEntity.setUserId(user.getUserId());
+        chartEntity.setName(name);
+        chartEntity.setGoal(goal);
+        chartEntity.setChartData(csvData);
+        chartEntity.setChartType(chartType);
+        chartEntity.setGenChart(genChart);
+        chartEntity.setGenResult(genResult);
+        boolean save = chartService.save(chartEntity);
+        ThrowUtils.throwIf(!save,ErrorCode.SYSTEM_ERROR,"图表保存失败!");
+
+        // 封装返回结果
+        BiResponse biResponse = new BiResponse();
+        biResponse.setGenChart(genChart);
+        biResponse.setGenResult(genResult);
+
+        // todo 图表原始数据压缩 (AI接口普遍有字数限制)
+        return ResultUtil.success(biResponse);
+    }
+
 
     /**
      * 创建
@@ -60,7 +140,7 @@ public class ChartController {
         }
         ChartEntity chart = new ChartEntity();
         BeanUtils.copyProperties(chartAddRequest, chart);
-        UserEntity loginUser = userService.getLoginUser(request);
+        UserEntity loginUser = userService.getLoginUser();
         chart.setUserId(loginUser.getUserId());
         boolean result = chartService.save(chart);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
@@ -80,7 +160,7 @@ public class ChartController {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        UserEntity user = userService.getLoginUser(request);
+        UserEntity user = userService.getLoginUser();
         long id = deleteRequest.getId();
         // 判断是否存在
         ChartEntity oldChartEntity = chartService.getById(id);
@@ -142,7 +222,7 @@ public class ChartController {
      */
     @PostMapping("/list/page")
     public BaseResponse<Page<ChartEntity>> listChartEntityByPage(@RequestBody ChartQueryRequest chartQueryRequest,
-                                                     HttpServletRequest request) {
+                                                                 HttpServletRequest request) {
         long current = chartQueryRequest.getCurrent();
         long size = chartQueryRequest.getPageSize();
         // 限制爬虫
@@ -161,11 +241,11 @@ public class ChartController {
      */
     @PostMapping("/my/list/page")
     public BaseResponse<Page<ChartEntity>> listMyChartEntityByPage(@RequestBody ChartQueryRequest chartQueryRequest,
-                                                       HttpServletRequest request) {
+                                                                   HttpServletRequest request) {
         if (chartQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        UserEntity loginUser = userService.getLoginUser(request);
+        UserEntity loginUser = userService.getLoginUser();
         chartQueryRequest.setUserId(loginUser.getUserId());
         long current = chartQueryRequest.getCurrent();
         long size = chartQueryRequest.getPageSize();
@@ -192,7 +272,7 @@ public class ChartController {
         }
         ChartEntity chart = new ChartEntity();
         BeanUtils.copyProperties(chartEditRequest, chart);
-        UserEntity loginUser = userService.getLoginUser(request);
+        UserEntity loginUser = userService.getLoginUser();
         long id = chartEditRequest.getId();
         // 判断是否存在
         ChartEntity oldChartEntity = chartService.getById(id);
@@ -233,5 +313,27 @@ public class ChartController {
         queryWrapper.orderBy(SqlUtils.validSortField(sortField), sortOrder.equals(CommonConstant.SORT_ORDER_ASC),
                 sortField);
         return queryWrapper;
+    }
+
+    /**
+     * 校验文件
+     *
+     * @param multipartFile
+     * @param fileUploadBizEnum 业务类型
+     */
+    private void validFile(MultipartFile multipartFile, FileUploadBizEnum fileUploadBizEnum) {
+        // 文件大小
+        long fileSize = multipartFile.getSize();
+        // 文件后缀
+        String fileSuffix = FileUtil.getSuffix(multipartFile.getOriginalFilename());
+        final long TWO_M = 1024 * 1024L * 2;
+        if (FileUploadBizEnum.USER_AVATAR.equals(fileUploadBizEnum)) {
+            if (fileSize > TWO_M) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件大小不能超过 2M");
+            }
+            if (!Arrays.asList("jpeg", "jpg", "svg", "png", "webp").contains(fileSuffix)) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件类型错误");
+            }
+        }
     }
 }
