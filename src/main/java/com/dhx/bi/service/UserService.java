@@ -42,10 +42,9 @@ public interface UserService extends IService<UserEntity> {
 
     /**
      * 获取当前登录用户
-     * @param request
      * @return
      */
-    UserEntity getLoginUser(HttpServletRequest request);
+    UserEntity getLoginUser();
 
     /**
      * 是否是admin

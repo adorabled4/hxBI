@@ -18,13 +18,18 @@ public class ChartEntity implements Serializable {
     /**
      * id
      */
-    @TableId(type = IdType.AUTO)
+    @TableId
     private Long id;
 
     /**
      * 用户ID
      */
     private Long userId;
+
+    /**
+     * 表名称
+     */
+    private String name;
 
     /**
      * 分析目标
@@ -83,6 +88,7 @@ public class ChartEntity implements Serializable {
         ChartEntity other = (ChartEntity) that;
         return (this.getId() == null ? other.getId() == null : this.getId().equals(other.getId()))
             && (this.getUserId() == null ? other.getUserId() == null : this.getUserId().equals(other.getUserId()))
+            && (this.getName() == null ? other.getName() == null : this.getName().equals(other.getName()))
             && (this.getGoal() == null ? other.getGoal() == null : this.getGoal().equals(other.getGoal()))
             && (this.getChartData() == null ? other.getChartData() == null : this.getChartData().equals(other.getChartData()))
             && (this.getChartType() == null ? other.getChartType() == null : this.getChartType().equals(other.getChartType()))
@@ -99,6 +105,7 @@ public class ChartEntity implements Serializable {
         int result = 1;
         result = prime * result + ((getId() == null) ? 0 : getId().hashCode());
         result = prime * result + ((getUserId() == null) ? 0 : getUserId().hashCode());
+        result = prime * result + ((getName() == null) ? 0 : getName().hashCode());
         result = prime * result + ((getGoal() == null) ? 0 : getGoal().hashCode());
         result = prime * result + ((getChartData() == null) ? 0 : getChartData().hashCode());
         result = prime * result + ((getChartType() == null) ? 0 : getChartType().hashCode());
@@ -118,6 +125,7 @@ public class ChartEntity implements Serializable {
         sb.append("Hash = ").append(hashCode());
         sb.append(", id=").append(id);
         sb.append(", userId=").append(userId);
+        sb.append(", name=").append(name);
         sb.append(", goal=").append(goal);
         sb.append(", chartData=").append(chartData);
         sb.append(", chartType=").append(chartType);

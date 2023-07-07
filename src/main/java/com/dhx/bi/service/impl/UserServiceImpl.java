@@ -131,7 +131,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity>
     }
 
     @Override
-    public UserEntity getLoginUser(HttpServletRequest request) {
+    public UserEntity getLoginUser() {
         UserDTO user = UserHolder.getUser();
         Long userId = user.getUserId();
         return getById(userId);

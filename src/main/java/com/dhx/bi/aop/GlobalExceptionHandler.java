@@ -43,14 +43,14 @@ public class GlobalExceptionHandler {
      * 处理自定义异常
      */
     @ExceptionHandler(BusinessException.class)
-    public BaseResponse<Object> handleRRException(BusinessException e){
-        log.error(e.getDescription(), e);
-        return ResultUtil.error(e.getCode(),e.getMessage(),e.getDescription());
+    public BaseResponse<Object> handleRRException(BusinessException e) {
+        log.error("RuntimeException", e);
+        return ResultUtil.error(e.getCode(), e.getMessage(), e.getDescription());
     }
 
     @ExceptionHandler(NoHandlerFoundException.class)
     public BaseResponse handlerNoFoundException(Exception e) {
-        log.error(e.getMessage(), e);
+        log.error("RuntimeException", e);
         return ResultUtil.error(ErrorCode.NOT_FOUND);
     }
 
@@ -66,12 +66,13 @@ public class GlobalExceptionHandler {
                 sb.append(objectError.getDefaultMessage()).append(";");
             }
         }
-        return ResultUtil.error(ErrorCode.PARAMS_ERROR,sb.toString());
+        log.error("MethodArgumentNotValidException", e);
+        return ResultUtil.error(ErrorCode.PARAMS_ERROR, sb.toString());
     }
 
     @ExceptionHandler(Exception.class)
-    public BaseResponse handleException(Exception e){
-        log.error(e.getMessage(), e);
+    public BaseResponse handleException(Exception e) {
+        log.error("Exception", e);
         return ResultUtil.error();
     }
 }
