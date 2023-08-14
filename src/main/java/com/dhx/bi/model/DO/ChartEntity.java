@@ -37,6 +37,16 @@ public class ChartEntity implements Serializable {
     private String goal;
 
     /**
+     * wait,running,succeed,failed
+     */
+    private String status;
+
+    /**
+     * 执行信息
+     */
+    private String execmessage;
+
+    /**
      * 图表数据
      */
     private String chartData;
@@ -90,6 +100,8 @@ public class ChartEntity implements Serializable {
             && (this.getUserId() == null ? other.getUserId() == null : this.getUserId().equals(other.getUserId()))
             && (this.getName() == null ? other.getName() == null : this.getName().equals(other.getName()))
             && (this.getGoal() == null ? other.getGoal() == null : this.getGoal().equals(other.getGoal()))
+            && (this.getStatus() == null ? other.getStatus() == null : this.getStatus().equals(other.getStatus()))
+            && (this.getExecmessage() == null ? other.getExecmessage() == null : this.getExecmessage().equals(other.getExecmessage()))
             && (this.getChartData() == null ? other.getChartData() == null : this.getChartData().equals(other.getChartData()))
             && (this.getChartType() == null ? other.getChartType() == null : this.getChartType().equals(other.getChartType()))
             && (this.getGenChart() == null ? other.getGenChart() == null : this.getGenChart().equals(other.getGenChart()))
@@ -107,6 +119,8 @@ public class ChartEntity implements Serializable {
         result = prime * result + ((getUserId() == null) ? 0 : getUserId().hashCode());
         result = prime * result + ((getName() == null) ? 0 : getName().hashCode());
         result = prime * result + ((getGoal() == null) ? 0 : getGoal().hashCode());
+        result = prime * result + ((getStatus() == null) ? 0 : getStatus().hashCode());
+        result = prime * result + ((getExecmessage() == null) ? 0 : getExecmessage().hashCode());
         result = prime * result + ((getChartData() == null) ? 0 : getChartData().hashCode());
         result = prime * result + ((getChartType() == null) ? 0 : getChartType().hashCode());
         result = prime * result + ((getGenChart() == null) ? 0 : getGenChart().hashCode());
@@ -127,6 +141,8 @@ public class ChartEntity implements Serializable {
         sb.append(", userId=").append(userId);
         sb.append(", name=").append(name);
         sb.append(", goal=").append(goal);
+        sb.append(", status=").append(status);
+        sb.append(", execmessage=").append(execmessage);
         sb.append(", chartData=").append(chartData);
         sb.append(", chartType=").append(chartType);
         sb.append(", genChart=").append(genChart);

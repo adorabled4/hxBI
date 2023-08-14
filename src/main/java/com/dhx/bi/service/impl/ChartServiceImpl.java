@@ -9,11 +9,11 @@ import org.springframework.stereotype.Service;
 /**
 * @author dhx
 * @description 针对表【t_chart(图表表)】的数据库操作Service实现
-* @createDate 2023-07-04 10:00:22
+* @createDate 2023-08-01 14:42:26
 */
 @Service
 public class ChartServiceImpl extends ServiceImpl<ChartMapper, ChartEntity>
-    implements ChartService {
+    implements ChartService{
 
 }
 

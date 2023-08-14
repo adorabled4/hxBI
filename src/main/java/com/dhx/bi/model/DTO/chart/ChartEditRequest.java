@@ -28,6 +28,16 @@ public class ChartEditRequest implements Serializable {
     private String goal;
 
     /**
+     * 执行信息
+     */
+    private String execmessage;
+
+    /**
+     * wait,running,succeed,failed
+     */
+    private String status;
+
+    /**
      * 图表数据
      */
     private String chartData;

@@ -34,6 +34,16 @@ public class ChartUpdateRequest implements Serializable {
     private String goal;
 
     /**
+     * wait,running,succeed,failed
+     */
+    private String status;
+
+    /**
+     * 执行信息
+     */
+    private String execmessage;
+
+    /**
      * 图表数据
      */
     private String chartData;
