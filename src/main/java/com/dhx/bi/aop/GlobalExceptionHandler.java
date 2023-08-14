@@ -44,7 +44,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(BusinessException.class)
     public BaseResponse<Object> handleRRException(BusinessException e) {
-        log.error("RuntimeException", e);
+        log.error("BusinessException", e.getDescription());
         return ResultUtil.error(e.getCode(), e.getMessage(), e.getDescription());
     }
 

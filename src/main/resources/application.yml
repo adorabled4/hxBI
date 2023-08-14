@@ -1,6 +1,6 @@
 spring:
   application:
-    name: springboot-template
+    name: hxBI
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -46,7 +46,7 @@ mybatis-plus:
 knife4j:
   enable: true
   openapi:
-    title: springboot-template_bankend
+    title: hxBI_bankend
     description: 后端接口文档
     email: dhx2648466390@163.com
     concat: adorabled4
@@ -70,3 +70,7 @@ template:
     core-size: 20
     max-size: 200
     keep-alive-time: 10
+yuapi:
+  client:
+    access-key: 3s4a0scf557tvxndeup21unetan7ly1j
+    secret-key: q83o1vnlpd8urm3ha1g15r6tm3t701rp
