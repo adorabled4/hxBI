@@ -32,7 +32,7 @@ public class RedisLimiterManager {
         rateLimiter.trySetRate(RateType.OVERALL,2, 1,RateIntervalUnit.SECONDS);
         // 1 token per operation
         boolean isAcquire = rateLimiter.tryAcquire(1);
-        if(isAcquire){
+        if(!isAcquire){
             throw new BusinessException(ErrorCode.TOO_MANY_REQUEST);
         }
     }
