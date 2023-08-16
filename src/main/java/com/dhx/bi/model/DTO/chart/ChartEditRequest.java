@@ -30,7 +30,7 @@ public class ChartEditRequest implements Serializable {
     /**
      * 执行信息
      */
-    private String execmessage;
+    private String execMessage;
 
     /**
      * wait,running,succeed,failed

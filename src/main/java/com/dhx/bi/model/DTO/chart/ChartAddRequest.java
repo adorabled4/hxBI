@@ -30,7 +30,7 @@ public class ChartAddRequest implements Serializable {
     /**
      * 执行信息
      */
-    private String execmessage;
+    private String execMessage;
 
     /**
      * 图表数据

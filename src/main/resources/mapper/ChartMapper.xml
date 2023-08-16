@@ -10,7 +10,7 @@
             <result property="name" column="name" jdbcType="VARCHAR"/>
             <result property="goal" column="goal" jdbcType="VARCHAR"/>
             <result property="status" column="status" jdbcType="VARCHAR"/>
-            <result property="execmessage" column="execMessage" jdbcType="VARCHAR"/>
+            <result property="execMessage" column="execMessage" jdbcType="VARCHAR"/>
             <result property="chartData" column="chart_data" jdbcType="VARCHAR"/>
             <result property="chartType" column="chart_type" jdbcType="VARCHAR"/>
             <result property="genChart" column="gen_chart" jdbcType="VARCHAR"/>
@@ -22,7 +22,7 @@
 
     <sql id="Base_Column_List">
         id,user_id,name,
-        goal,status,execMessage,
+        goal,status,exec_message,
         chart_data,chart_type,gen_chart,
         gen_result,create_time,update_time,
         is_delete

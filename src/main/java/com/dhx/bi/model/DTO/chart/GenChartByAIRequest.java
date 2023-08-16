@@ -16,11 +16,6 @@ public class GenChartByAIRequest implements Serializable {
 
 
     /**
-     * 业务
-     */
-    private String biz;
-
-    /**
      * 表名称
      */
     private String name;
