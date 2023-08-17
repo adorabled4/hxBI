@@ -31,6 +31,12 @@ spring:
   jackson:
     serialization:
       FAIL_ON_EMPTY_BEANS: false
+  rabbitmq:
+    host: 192.168.159.134
+    port: 5672
+    username: dhx
+    password: qwer
+    virtual-host: /
 server:
   port: 6848
   servlet:

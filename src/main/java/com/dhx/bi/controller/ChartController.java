@@ -10,6 +10,7 @@ import com.dhx.bi.common.constant.AIConstant;
 import com.dhx.bi.common.constant.CommonConstant;
 import com.dhx.bi.common.constant.UserConstant;
 import com.dhx.bi.common.exception.BusinessException;
+import com.dhx.bi.mq.producer.BiMqMessageProducer;
 import com.dhx.bi.manager.AiManager;
 import com.dhx.bi.manager.RedisLimiterManager;
 import com.dhx.bi.model.DO.ChartEntity;
@@ -34,6 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -62,17 +64,19 @@ public class ChartController {
     @Resource
     private RedisLimiterManager redisLimiterManager;
 
+    @Resource
+    private BiMqMessageProducer biMqMessageProducer;
+
     /**
      * 智能图表(同步)
      *
      * @param multipartFile 数据文件
      * @param chartRequest  图要求
-     * @param request       请求
      * @return {@link BaseResponse}<{@link BiResponse}>
      */
     @PostMapping("/gen")
     public BaseResponse<BiResponse> getChartByAiSync(@RequestPart("file") MultipartFile multipartFile,
-                                                     GenChartByAIRequest chartRequest, HttpServletRequest request) {
+                                                     GenChartByAIRequest chartRequest) {
         // 取出数据
         String chartType = chartRequest.getChartType();
         String name = chartRequest.getName();
@@ -82,6 +86,7 @@ public class ChartController {
         // 校验
         ThrowUtils.throwIf(StringUtils.isBlank(goal), ErrorCode.PARAMS_ERROR, "目标为空!");
         ThrowUtils.throwIf(StringUtils.isNotBlank(name) && name.length() > 100, ErrorCode.PARAMS_ERROR, "名称过长!");
+        checkFile(multipartFile);
         // 获取CSV
         String csvData = ExcelUtils.excel2CSV(multipartFile);
         // 构造用户输入
@@ -141,16 +146,15 @@ public class ChartController {
 
 
     /**
-     * 智能图表(异步)
+     * 智能图表(异步) : 消息队列
      *
      * @param multipartFile 数据文件
      * @param chartRequest  图要求
-     * @param request       请求
      * @return {@link BaseResponse}<{@link BiResponse}>
      */
-    @PostMapping("/gen/async")
-    public BaseResponse<BiResponse> getChartByAiAsync(@RequestPart("file") MultipartFile multipartFile,
-                                                  GenChartByAIRequest chartRequest, HttpServletRequest request) {
+    @PostMapping("/gen/async/mq")
+    public BaseResponse<BiResponse> getChartByAiAsyncMq(@RequestPart("file") MultipartFile multipartFile,
+                                                        GenChartByAIRequest chartRequest) {
         // 1.save chat(Not Generated)
         // 取出数据
         String chartType = chartRequest.getChartType();
@@ -159,6 +163,42 @@ public class ChartController {
         // 校验
         ThrowUtils.throwIf(StringUtils.isBlank(goal), ErrorCode.PARAMS_ERROR, "目标为空!");
         ThrowUtils.throwIf(StringUtils.isNotBlank(name) && name.length() > 100, ErrorCode.PARAMS_ERROR, "名称过长!");
+        checkFile(multipartFile);
+        // 获取用户信息
+        UserEntity user = userService.getLoginUser();
+        redisLimiterManager.doRateLimit("genChartByAi_" + user.getUserId());
+        // 读取文件信息
+        String csvData = ExcelUtils.excel2CSV(multipartFile);
+        // 插入数据到数据库
+        ChartEntity chartEntity = new ChartEntity();
+        chartEntity.setUserId(user.getUserId());
+        chartEntity.setName(name);
+        chartEntity.setGoal(goal);
+        chartEntity.setStatus(ChartStatusEnum.WAIT.getStatus());
+        chartEntity.setChartType(chartType);
+        chartEntity.setChartData(csvData);
+        boolean save = chartService.save(chartEntity);
+        ThrowUtils.throwIf(!save, ErrorCode.SYSTEM_ERROR, "图表保存失败");
+        // 2.submit task to thread pool
+        long newChartId = chartEntity.getId();
+        biMqMessageProducer.sendMessage(String.valueOf(newChartId));
+        BiResponse biResponse = new BiResponse();
+        biResponse.setChartId(newChartId);
+        return ResultUtil.success(biResponse);
+    }
+
+    @PostMapping("/gen/async")
+    public BaseResponse<BiResponse> getChartByAiAsync(@RequestPart("file") MultipartFile multipartFile,
+                                                      GenChartByAIRequest chartRequest) {
+        // 1.save chat(Not Generated)
+        // 取出数据
+        String chartType = chartRequest.getChartType();
+        String name = chartRequest.getName();
+        String goal = chartRequest.getGoal();
+        // 校验
+        ThrowUtils.throwIf(StringUtils.isBlank(goal), ErrorCode.PARAMS_ERROR, "目标为空!");
+        ThrowUtils.throwIf(StringUtils.isNotBlank(name) && name.length() > 100, ErrorCode.PARAMS_ERROR, "名称过长!");
+        checkFile(multipartFile);
         // 获取用户信息
         UserEntity user = userService.getLoginUser();
         // 读取文件信息
@@ -443,4 +483,22 @@ public class ChartController {
             }
         }
     }
+
+    /**
+     * 检查文件
+     *
+     * @param file 文件
+     */
+    private void checkFile(MultipartFile file) {
+        long size = file.getSize();
+        String originalFilename = file.getOriginalFilename();
+        // 校验文件大小
+        final long ONE_MB = 1024 * 1024L;
+        ThrowUtils.throwIf(size > ONE_MB, ErrorCode.PARAMS_ERROR, "文件超过 1M");
+        // 校验文件后缀 aaa.png
+        String suffix = FileUtil.getSuffix(originalFilename);
+        final List<String> validFileSuffixList = Arrays.asList("xlsx", "xls");
+        ThrowUtils.throwIf(!validFileSuffixList.contains(suffix), ErrorCode.PARAMS_ERROR, "文件后缀非法");
+    }
+
 }
