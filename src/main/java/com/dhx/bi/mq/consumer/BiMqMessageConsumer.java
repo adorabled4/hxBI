@@ -12,6 +12,10 @@ import com.dhx.bi.utils.ThrowUtils;
 import com.rabbitmq.client.Channel;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.amqp.core.ExchangeTypes;
+import org.springframework.amqp.rabbit.annotation.Exchange;
+import org.springframework.amqp.rabbit.annotation.Queue;
+import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.messaging.handler.annotation.Header;
@@ -35,7 +39,12 @@ public class BiMqMessageConsumer {
     @Resource
     ChartService chartService;
 
-    @RabbitListener(queues = BiMqConstant.AI_GENCHART_QUEUE, ackMode = "MANUAL")
+//    @RabbitListener(queues = BiMqConstant.BI_QUEUE_NAME, ackMode = "MANUAL")
+    @RabbitListener(bindings = @QueueBinding(
+            value = @Queue(name = BiMqConstant.BI_QUEUE_NAME),
+            exchange = @Exchange(name =BiMqConstant.BI_EXCHANGE_NAME, type = ExchangeTypes.DIRECT),
+            key=BiMqConstant.BI_ROUTING_KEY
+    ))
     private void receiveMessage(String message, Channel channel, @Header(AmqpHeaders.DELIVERY_TAG) long deliverTag) throws IOException {
         log.info("receive message :{}", message);
         if (StringUtils.isBlank(message)) {

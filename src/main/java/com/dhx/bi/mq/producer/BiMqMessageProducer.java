@@ -18,6 +18,6 @@ public class BiMqMessageProducer {
     RabbitTemplate rabbitTemplate;
 
     public void sendMessage(String message){
-        rabbitTemplate.convertAndSend(BiMqConstant.AI_GENCHART_QUEUE,BiMqConstant.BI_ROUTING_KEY,message);
+        rabbitTemplate.convertAndSend(BiMqConstant.BI_EXCHANGE_NAME,BiMqConstant.BI_ROUTING_KEY,message);
     }
 }
