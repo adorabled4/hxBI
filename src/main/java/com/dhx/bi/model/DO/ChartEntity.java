@@ -2,9 +2,12 @@ package com.dhx.bi.model.DO;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.util.Date;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 
 /**
@@ -18,6 +21,7 @@ public class ChartEntity implements Serializable {
      * id
      */
     @TableId
+    @JsonSerialize(using= ToStringSerializer.class)
     private Long id;
 
     /**
@@ -78,6 +82,7 @@ public class ChartEntity implements Serializable {
     /**
      * 逻辑删除
      */
+    @TableLogic
     private Integer isDelete;
 
     @TableField(exist = false)

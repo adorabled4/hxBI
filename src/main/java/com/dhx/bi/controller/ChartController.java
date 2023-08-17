@@ -113,7 +113,8 @@ public class ChartController {
         2号,20
         3号,30
         */
-        String result = aiManager.doChat(userInput.toString(), AIConstant.BI_MODEL_ID);
+//        String result = aiManager.doChat(userInput.toString(), AIConstant.BI_MODEL_ID);
+        String result = aiManager.chatAndGenChart(goal,chartType,csvData);
         String[] split = result.split("【【【【【");
         // 第一个是 空字符串
         if (split.length < 3) {
@@ -237,7 +238,8 @@ public class ChartController {
                 userInput.append(csvData).append("\n");
                 // 系统预设 ( 简单预设 )
                 /* 较好的做法是在系统（模型）层面做预设效果一般来说，会比直接拼接在用户消息里效果更好一些。*/
-                String result = aiManager.doChat(userInput.toString(), AIConstant.BI_MODEL_ID);
+//                String result = aiManager.doChat(userInput.toString(), AIConstant.BI_MODEL_ID);
+                String result = aiManager.chatAndGenChart(goal,chartType,csvData);
                 String[] split = result.split("【【【【【");
                 // 第一个是 空字符串
                 if (split.length < 3) {
