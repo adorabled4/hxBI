@@ -25,6 +25,7 @@ import com.dhx.bi.utils.ExcelUtils;
 import com.dhx.bi.utils.ResultUtil;
 import com.dhx.bi.utils.SqlUtils;
 import com.dhx.bi.utils.ThrowUtils;
+import com.dhx.bi.webSocket.WebSocketServer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -34,7 +35,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -66,6 +69,9 @@ public class ChartController {
 
     @Resource
     private BiMqMessageProducer biMqMessageProducer;
+
+    @Resource
+    private WebSocketServer webSocketServer;
 
     /**
      * 智能图表(同步)
@@ -257,6 +263,12 @@ public class ChartController {
                 updateChartResult.setStatus(ChartStatusEnum.SUCCEED.getStatus());
                 boolean updateGenResult = chartService.updateById(updateChartResult);
                 ThrowUtils.throwIf(!updateGenResult, ErrorCode.SYSTEM_ERROR, "生成图表保存失败!");
+                try {
+                    webSocketServer.sendMessage("您的[" + chartEntity.getName() + "]生成成功 , 前往 我的图表 进行查看",
+                            new HashSet<>(Arrays.asList(chartEntity.getUserId().toString())));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }, threadPoolExecutor);
 
         } catch (BusinessException e) {

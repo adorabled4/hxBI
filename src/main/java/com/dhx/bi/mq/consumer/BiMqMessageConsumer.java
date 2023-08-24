@@ -9,6 +9,7 @@ import com.dhx.bi.model.DO.ChartEntity;
 import com.dhx.bi.model.enums.ChartStatusEnum;
 import com.dhx.bi.service.ChartService;
 import com.dhx.bi.utils.ThrowUtils;
+import com.dhx.bi.webSocket.WebSocketServer;
 import com.rabbitmq.client.Channel;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -23,6 +24,8 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
 
 /**
  * @author adorabled4
@@ -39,11 +42,14 @@ public class BiMqMessageConsumer {
     @Resource
     ChartService chartService;
 
-//    @RabbitListener(queues = BiMqConstant.BI_QUEUE_NAME, ackMode = "MANUAL")
+    @Resource
+    WebSocketServer webSocketServer;
+
+    //    @RabbitListener(queues = BiMqConstant.BI_QUEUE_NAME, ackMode = "MANUAL")
     @RabbitListener(bindings = @QueueBinding(
             value = @Queue(name = BiMqConstant.BI_QUEUE_NAME),
-            exchange = @Exchange(name =BiMqConstant.BI_EXCHANGE_NAME, type = ExchangeTypes.DIRECT),
-            key=BiMqConstant.BI_ROUTING_KEY
+            exchange = @Exchange(name = BiMqConstant.BI_EXCHANGE_NAME, type = ExchangeTypes.DIRECT),
+            key = BiMqConstant.BI_ROUTING_KEY
     ))
     private void receiveMessage(String message, Channel channel, @Header(AmqpHeaders.DELIVERY_TAG) long deliverTag) throws IOException {
         log.info("receive message :{}", message);
@@ -69,11 +75,11 @@ public class BiMqMessageConsumer {
             String userInput = buildUserInput(chartEntity);
             // 系统预设 ( 简单预设 )
             /* 较好的做法是在系统（模型）层面做预设效果一般来说，会比直接拼接在用户消息里效果更好一些。*/
-//            String result = aiManager.doChat(userInput.toString(), AIConstant.BI_MODEL_ID);
-            String goal= chartEntity.getGoal();
+            String result = aiManager.doChat(userInput.toString(), AIConstant.BI_MODEL_ID);
+            String goal = chartEntity.getGoal();
             String csvData = chartEntity.getChartData();
             String chartType = chartEntity.getChartType();
-            String result = aiManager.chatAndGenChart(goal,chartType,csvData);
+//            String result = aiManager.chatAndGenChart(goal, chartType, csvData);
             String[] split = result.split("【【【【【");
             // 第一个是 空字符串
             if (split.length < 3) {
@@ -93,7 +99,7 @@ public class BiMqMessageConsumer {
             ThrowUtils.throwIf(!updateGenResult, ErrorCode.SYSTEM_ERROR, "生成图表保存失败!");
         } catch (BusinessException e) {
             // reject
-            channel.basicNack(deliverTag,false,false);
+            channel.basicNack(deliverTag, false, false);
             ChartEntity updateChartResult = new ChartEntity();
             updateChartResult.setId(chartId);
             updateChartResult.setStatus(ChartStatusEnum.FAILED.getStatus());
@@ -102,7 +108,10 @@ public class BiMqMessageConsumer {
             if (!updateResult) {
                 log.info("更新图表FAILED状态信息失败 , chatId:{}", updateChartResult.getId());
             }
+            return ;
         }
+        webSocketServer.sendMessage("您的[" + chartEntity.getName() + "]生成成功 , 前往 我的图表 进行查看",
+                new HashSet<>(Arrays.asList(chartEntity.getUserId().toString())));
         channel.basicAck(deliverTag, false);
     }
 

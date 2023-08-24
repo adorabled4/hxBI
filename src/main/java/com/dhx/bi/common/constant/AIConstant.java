@@ -7,7 +7,8 @@ package com.dhx.bi.common.constant;
  **/
 public class AIConstant {
 
-    public static final long BI_MODEL_ID= 1659171950288818178L;
+//    public static final long BI_MODEL_ID= 1692036014358441985L;
 
+    public static final long BI_MODEL_ID=1659171950288818178L;
 
 }
