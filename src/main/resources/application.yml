@@ -44,9 +44,9 @@ server:
 mybatis-plus:
   global-config:
     db-config:
-      logic-not-delete-value: 1 # mybatis-plus 逻辑删除
-  configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 打印sql
+      logic-not-delete-value: 0 # mybatis-plus 逻辑删除
+#  configuration:
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 打印sql
 
 
 knife4j:
