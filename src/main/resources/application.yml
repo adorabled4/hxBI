@@ -59,7 +59,7 @@ mybatis-plus:
 knife4j:
   enable: true
   openapi:
-    title: hxBI_bankend
+    title: hxBI_backend
     description: 后端接口文档
     email: dhx2648466390@163.com
     concat: adorabled4

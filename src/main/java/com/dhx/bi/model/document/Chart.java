@@ -4,6 +4,7 @@ import lombok.Data;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
@@ -17,15 +18,30 @@ import java.util.Date;
 @Data
 public class Chart {
 
+    public static final Integer DEFAULT_VERSION = 1;
+    public static final String COLLECTION_NAME = "chart";
+
     /**
-     * id
+     * MongoDB自动生成的唯一ID
      */
     @Id
-    private Long id;
+    private String id;
+
+    /**
+     * 图表id
+     */
+    @Indexed
+    private Long chartId;
+
+    /**
+     * 版本号 : 用户可以更改提交的数据, 并且重新生成新的版本的图表
+     */
+    private Integer version;
 
     /**
      * 用户ID
      */
+    @Indexed
     private Long userId;
 
     /**
@@ -47,11 +63,11 @@ public class Chart {
      * 执行信息
      */
     private String execMessage;
-
-    /**
-     * 图表数据
-     */
-    private String chartData;
+//
+//    /**
+//     * 图表数据
+//     */
+//    private String chartData;
 
     /**
      * 图表类型
@@ -90,13 +106,14 @@ public class Chart {
     @Override
     public String toString() {
         return "Chart{" +
-                "id=" + id +
+                "id='" + id + '\'' +
+                ", chartId=" + chartId +
+                ", version=" + version +
                 ", userId=" + userId +
                 ", name='" + name + '\'' +
                 ", goal='" + goal + '\'' +
                 ", status='" + status + '\'' +
                 ", execMessage='" + execMessage + '\'' +
-                ", chartData='" + chartData + '\'' +
                 ", chartType='" + chartType + '\'' +
                 ", genChart='" + genChart + '\'' +
                 ", genResult='" + genResult + '\'' +
@@ -112,11 +129,11 @@ public class Chart {
 
         Chart chart = (Chart) o;
 
-        return new EqualsBuilder().append(id, chart.id).append(userId, chart.userId).append(name, chart.name).append(goal, chart.goal).append(status, chart.status).append(execMessage, chart.execMessage).append(chartData, chart.chartData).append(chartType, chart.chartType).append(genChart, chart.genChart).append(genResult, chart.genResult).append(createTime, chart.createTime).isEquals();
+        return new EqualsBuilder().append(id, chart.id).append(chartId, chart.chartId).append(version, chart.version).append(userId, chart.userId).append(name, chart.name).append(goal, chart.goal).append(status, chart.status).append(execMessage, chart.execMessage).append(chartType, chart.chartType).append(genChart, chart.genChart).append(genResult, chart.genResult).append(createTime, chart.createTime).isEquals();
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37).append(id).append(userId).append(name).append(goal).append(status).append(execMessage).append(chartData).append(chartType).append(genChart).append(genResult).append(createTime).toHashCode();
+        return new HashCodeBuilder(17, 37).append(id).append(chartId).append(version).append(userId).append(name).append(goal).append(status).append(execMessage).append(chartType).append(genChart).append(genResult).append(createTime).toHashCode();
     }
 }

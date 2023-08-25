@@ -2,14 +2,13 @@ package com.dhx.bi.controller;
 
 import cn.hutool.core.io.FileUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dhx.bi.common.BaseResponse;
 import com.dhx.bi.common.ErrorCode;
 import com.dhx.bi.common.annotation.AuthCheck;
-import com.dhx.bi.common.constant.AIConstant;
 import com.dhx.bi.common.constant.CommonConstant;
 import com.dhx.bi.common.constant.UserConstant;
 import com.dhx.bi.common.exception.BusinessException;
+import com.dhx.bi.model.document.Chart;
 import com.dhx.bi.mq.producer.BiMqMessageProducer;
 import com.dhx.bi.manager.AiManager;
 import com.dhx.bi.manager.RedisLimiterManager;
@@ -26,10 +25,12 @@ import com.dhx.bi.utils.ResultUtil;
 import com.dhx.bi.utils.SqlUtils;
 import com.dhx.bi.utils.ThrowUtils;
 import com.dhx.bi.webSocket.WebSocketServer;
+import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -50,6 +51,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 @RequestMapping("/chart")
 @RestController
 @Slf4j
+@Api
 public class ChartController {
 
     @Resource
@@ -378,19 +380,17 @@ public class ChartController {
      * 分页获取列表（封装类）
      *
      * @param chartQueryRequest
-     * @param request
      * @return
      */
     @PostMapping("/list/page")
-    public BaseResponse<Page<ChartEntity>> listChartEntityByPage(@RequestBody ChartQueryRequest chartQueryRequest,
-                                                                 HttpServletRequest request) {
-        long current = chartQueryRequest.getCurrent();
+    public BaseResponse<Page<Chart>> listChartEntityByPage(@RequestBody ChartQueryRequest chartQueryRequest) {
         long size = chartQueryRequest.getPageSize();
         // 限制爬虫
         ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
-        Page<ChartEntity> chartPage = chartService.page(new Page<>(current, size),
-                getQueryWrapper(chartQueryRequest));
-        return ResultUtil.success(chartPage);
+        Page<Chart> charts= chartService.getChartList(chartQueryRequest);
+//        Page<ChartEntity> chartPage = chartService.page(new Page<>(current, size),
+//                getQueryWrapper(chartQueryRequest));
+        return ResultUtil.success(charts);
     }
 
     /**
@@ -401,7 +401,7 @@ public class ChartController {
      * @return
      */
     @PostMapping("/my/list/page")
-    public BaseResponse<Page<ChartEntity>> listMyChartEntityByPage(@RequestBody ChartQueryRequest chartQueryRequest,
+    public BaseResponse<Page<Chart>> listMyChartEntityByPage(@RequestBody ChartQueryRequest chartQueryRequest,
                                                                    HttpServletRequest request) {
         if (chartQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -412,9 +412,10 @@ public class ChartController {
         long size = chartQueryRequest.getPageSize();
         // 限制爬虫
         ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
-        Page<ChartEntity> chartPage = chartService.page(new Page<>(current, size),
-                getQueryWrapper(chartQueryRequest));
-        return ResultUtil.success(chartPage);
+        Page<Chart> charts= chartService.getChartList(chartQueryRequest);
+//        Page<ChartEntity> chartPage = chartService.page(new Page<>(current, size),
+//                getQueryWrapper(chartQueryRequest));
+        return ResultUtil.success(charts);
     }
 
     // endregion
