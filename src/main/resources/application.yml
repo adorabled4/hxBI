@@ -37,6 +37,14 @@ spring:
     username: dhx
     password: qwer
     virtual-host: /
+  data:
+    mongodb:
+      host: 192.168.159.134
+      port: 27017
+      database: bi
+      username: root
+      password: root
+
 server:
   port: 6848
   servlet:
@@ -47,7 +55,6 @@ mybatis-plus:
       logic-not-delete-value: 0 # mybatis-plus 逻辑删除
 #  configuration:
 #    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 打印sql
-
 
 knife4j:
   enable: true
