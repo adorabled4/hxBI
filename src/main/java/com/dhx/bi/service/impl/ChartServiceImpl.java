@@ -38,8 +38,14 @@ public class ChartServiceImpl extends ServiceImpl<ChartMapper, ChartEntity>
 
     @Override
     public boolean saveDocument(Chart chart) {
-        Chart save = chartRepository.save(chart);
-        return true;
+        Long chartId = chart.getChartId();
+        List<Chart> charts = chartRepository.findAllByChartId(chartId);
+        if(charts.size()!=0){
+            return updateDocument(chart);
+        }else{
+            Chart save = chartRepository.save(chart);
+            return true;
+        }
     }
 
     @Override
@@ -97,9 +103,7 @@ public class ChartServiceImpl extends ServiceImpl<ChartMapper, ChartEntity>
 
     @Override
     public Chart getChartByChartId(long chartId) {
-        Query query = new Query();
-        query.addCriteria(Criteria.where("chatId").is(chartId));
-        List<Chart> charts = mongoTemplate.find(query, Chart.class);
+        List<Chart> charts = chartRepository.findAllByChartId(chartId);
         if (charts.size() == 1) {
             return charts.get(0);
         }
@@ -144,7 +148,23 @@ public class ChartServiceImpl extends ServiceImpl<ChartMapper, ChartEntity>
 
     @Override
     public boolean deleteFromMongo(long id) {
-        return chartRepository.deleteAllByChartId(id);
+        return chartRepository.deleteAllByChartId(id) != -1;
+    }
+
+    @Override
+    public boolean updateDocument(Chart chart) {
+        try {
+            // 不设置ID ,使用MongoDB自动的ObjectId
+            chart.setId(null);
+            List<Chart> allByChartId = chartRepository.findAllByChartId(chart.getChartId());
+            int nextVersion = getNextVersion(allByChartId);
+            chart.setVersion(nextVersion);
+            Chart save = chartRepository.save(chart);
+            return true;
+        } catch (RuntimeException e) {
+            log.error("更新文档失败: {},{}", e, chart);
+            return false;
+        }
     }
 
     /**

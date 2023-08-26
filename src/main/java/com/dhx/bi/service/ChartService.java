@@ -16,7 +16,7 @@ import java.util.List;
 public interface ChartService extends IService<ChartEntity> {
 
     /**
-     * 保存chart文档
+     * 保存chart文档 : 当存在旧版本时自动设置为newVersion
      *
      * @param chart 图表
      * @return boolean
@@ -63,4 +63,13 @@ public interface ChartService extends IService<ChartEntity> {
      * @return boolean
      */
     boolean deleteFromMongo(long id);
+
+
+    /**
+     * 从mongo更新Chart : 创建新的版本
+     *
+     * @param chart 图表
+     * @return boolean
+     */
+    boolean updateDocument(Chart chart);
 }

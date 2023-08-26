@@ -77,6 +77,7 @@ public class ChartController {
      * @return {@link BaseResponse}<{@link BiResponse}>
      */
     @PostMapping("/gen")
+    @Deprecated
     public BaseResponse<BiResponse> getChartByAiSync(@RequestPart("file") MultipartFile multipartFile,
                                                      GenChartByAIRequest chartRequest) {
         // 取出数据

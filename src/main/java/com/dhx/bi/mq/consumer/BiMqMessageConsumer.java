@@ -1,11 +1,13 @@
 package com.dhx.bi.mq.consumer;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.dhx.bi.common.ErrorCode;
 import com.dhx.bi.common.constant.AIConstant;
 import com.dhx.bi.common.constant.BiMqConstant;
 import com.dhx.bi.common.exception.BusinessException;
 import com.dhx.bi.manager.AiManager;
 import com.dhx.bi.model.DO.ChartEntity;
+import com.dhx.bi.model.document.Chart;
 import com.dhx.bi.model.enums.ChartStatusEnum;
 import com.dhx.bi.service.ChartService;
 import com.dhx.bi.utils.ThrowUtils;
@@ -46,11 +48,7 @@ public class BiMqMessageConsumer {
     WebSocketServer webSocketServer;
 
     //    @RabbitListener(queues = BiMqConstant.BI_QUEUE_NAME, ackMode = "MANUAL")
-    @RabbitListener(bindings = @QueueBinding(
-            value = @Queue(name = BiMqConstant.BI_QUEUE_NAME),
-            exchange = @Exchange(name = BiMqConstant.BI_EXCHANGE_NAME, type = ExchangeTypes.DIRECT),
-            key = BiMqConstant.BI_ROUTING_KEY
-    ))
+    @RabbitListener(bindings = @QueueBinding(value = @Queue(name = BiMqConstant.BI_QUEUE_NAME), exchange = @Exchange(name = BiMqConstant.BI_EXCHANGE_NAME, type = ExchangeTypes.DIRECT), key = BiMqConstant.BI_ROUTING_KEY))
     private void receiveMessage(String message, Channel channel, @Header(AmqpHeaders.DELIVERY_TAG) long deliverTag) throws IOException {
         log.info("receive message :{}", message);
         if (StringUtils.isBlank(message)) {
@@ -87,16 +85,22 @@ public class BiMqMessageConsumer {
             }
             // 图表代码
             String genChart = split[1].trim();
+            // TODO 压缩JSON数据
+            String compressedChart = compressJson(genChart);
             // 分析结果
             String genResult = split[2].trim();
             // 更新数据
             ChartEntity updateChartResult = new ChartEntity();
             updateChartResult.setId(chartId);
-            updateChartResult.setGenChart(genChart);
+            updateChartResult.setGenChart(compressedChart);
             updateChartResult.setGenResult(genResult);
             updateChartResult.setStatus(ChartStatusEnum.SUCCEED.getStatus());
+            // 保存数据到MongoDB
+            Chart chart = BeanUtil.copyProperties(chartEntity, Chart.class);
+            chart.setChartId(chartEntity.getId());
+            boolean saveResult = chartService.saveDocument(chart);
             boolean updateGenResult = chartService.updateById(updateChartResult);
-            ThrowUtils.throwIf(!updateGenResult, ErrorCode.SYSTEM_ERROR, "生成图表保存失败!");
+            ThrowUtils.throwIf(!(updateGenResult && saveResult), ErrorCode.SYSTEM_ERROR, "生成图表保存失败!");
         } catch (BusinessException e) {
             // reject
             channel.basicNack(deliverTag, false, false);
@@ -108,10 +112,9 @@ public class BiMqMessageConsumer {
             if (!updateResult) {
                 log.info("更新图表FAILED状态信息失败 , chatId:{}", updateChartResult.getId());
             }
-            return ;
+            return;
         }
-        webSocketServer.sendMessage("您的[" + chartEntity.getName() + "]生成成功 , 前往 我的图表 进行查看",
-                new HashSet<>(Arrays.asList(chartEntity.getUserId().toString())));
+        webSocketServer.sendMessage("您的[" + chartEntity.getName() + "]生成成功 , 前往 我的图表 进行查看", new HashSet<>(Arrays.asList(chartEntity.getUserId().toString())));
         channel.basicAck(deliverTag, false);
     }
 
@@ -131,6 +134,19 @@ public class BiMqMessageConsumer {
         userInput.append("原始数据：").append("\n");
         userInput.append(csvData).append("\n");
         return userInput.toString();
+    }
+
+    /**
+     * 压缩json
+     *
+     * @param data 数据
+     * @return {@link String}
+     */
+    public String compressJson(String data) {
+        data = data.replaceAll("\t+", "");
+        data = data.replaceAll(" +", "");
+        data = data.replaceAll("\n+", "");
+        return data;
     }
 
 }

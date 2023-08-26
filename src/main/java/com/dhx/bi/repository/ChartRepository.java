@@ -14,12 +14,15 @@ import java.util.List;
  * @date : 2023/08/25/ 17:17
  **/
 @Component
-public interface ChartRepository extends MongoRepository<Chart,String> {
+public interface ChartRepository extends MongoRepository<Chart, String> {
 
     @Query("{'userId': ?0}")
-    List<Chart> findAllByUserId(long userId,Pageable pageable);
+    List<Chart> findAllByUserId(long userId, Pageable pageable);
 
 
-    boolean deleteAllByChartId(long chartId);
+    long deleteAllByChartId(long chartId);
+
+    @Query("{'chartId': ?0}")
+    List<Chart> findAllByChartId(long chartId);
 
 }
