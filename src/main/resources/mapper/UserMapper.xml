@@ -7,7 +7,7 @@
     <resultMap id="BaseResultMap" type="com.dhx.bi.model.DO.UserEntity">
             <id property="userId" column="user_id" jdbcType="BIGINT"/>
             <result property="userName" column="user_name" jdbcType="VARCHAR"/>
-            <result property="userAccount" column="user_account" jdbcType="VARCHAR"/>
+<!--            <result property="userAccount" column="user_account" jdbcType="VARCHAR"/>-->
             <result property="avatarUrl" column="avatar_url" jdbcType="VARCHAR"/>
             <result property="gender" column="gender" jdbcType="TINYINT"/>
             <result property="userPassword" column="user_password" jdbcType="VARCHAR"/>
@@ -21,7 +21,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        user_id,user_name,user_account,
+        user_id,user_name,
         avatar_url,gender,user_password,
         address,phone,email,
         user_role,create_time,update_time,

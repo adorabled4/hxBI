@@ -26,10 +26,6 @@ public class UserEntity implements Serializable {
      */
     private String userName;
 
-    /**
-     * 账户
-     */
-    private String userAccount;
 
     /**
      * 登录密码
@@ -113,7 +109,6 @@ public class UserEntity implements Serializable {
         UserEntity other = (UserEntity) that;
         return (this.getUserId() == null ? other.getUserId() == null : this.getUserId().equals(other.getUserId()))
             && (this.getUserName() == null ? other.getUserName() == null : this.getUserName().equals(other.getUserName()))
-            && (this.getUserAccount() == null ? other.getUserAccount() == null : this.getUserAccount().equals(other.getUserAccount()))
             && (this.getUserPassword() == null ? other.getUserPassword() == null : this.getUserPassword().equals(other.getUserPassword()))
             && (this.getAddress() == null ? other.getAddress() == null : this.getAddress().equals(other.getAddress()))
             && (this.getAvatarUrl() == null ? other.getAvatarUrl() == null : this.getAvatarUrl().equals(other.getAvatarUrl()))
@@ -133,7 +128,6 @@ public class UserEntity implements Serializable {
         int result = 1;
         result = prime * result + ((getUserId() == null) ? 0 : getUserId().hashCode());
         result = prime * result + ((getUserName() == null) ? 0 : getUserName().hashCode());
-        result = prime * result + ((getUserAccount() == null) ? 0 : getUserAccount().hashCode());
         result = prime * result + ((getUserPassword() == null) ? 0 : getUserPassword().hashCode());
         result = prime * result + ((getAddress() == null) ? 0 : getAddress().hashCode());
         result = prime * result + ((getAvatarUrl() == null) ? 0 : getAvatarUrl().hashCode());
@@ -156,7 +150,6 @@ public class UserEntity implements Serializable {
         sb.append("Hash = ").append(hashCode());
         sb.append(", userId=").append(userId);
         sb.append(", userName=").append(userName);
-        sb.append(", userAccount=").append(userAccount);
         sb.append(", userPassword=").append(userPassword);
         sb.append(", address=").append(address);
         sb.append(", avatarUrl=").append(avatarUrl);
