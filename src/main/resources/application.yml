@@ -44,6 +44,11 @@ spring:
       database: bi
       username: root
       password: root
+  mail:
+    host: smtp.163.com
+    port: 25
+    username: dhx2648466390@163.com
+    password: EZKPSTZYFQTQCOET # 授权码
 
 server:
   port: 6848
