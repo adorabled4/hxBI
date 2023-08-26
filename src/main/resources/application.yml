@@ -55,7 +55,6 @@ mybatis-plus:
       logic-not-delete-value: 0 # mybatis-plus 逻辑删除
 #  configuration:
 #    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 打印sql
-
 knife4j:
   enable: true
   openapi:
@@ -77,6 +76,8 @@ knife4j:
 
 logging:
   config: classpath:logback.xml # 日志配置文件
+  level:
+    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
 
 template:
   thread:

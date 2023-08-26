@@ -55,4 +55,12 @@ public interface ChartService extends IService<ChartEntity> {
      * @return boolean
      */
     boolean insertChart(ChartEntity chartEntity);
+
+    /**
+     * 从mongo删除Chart
+     *
+     * @param id id
+     * @return boolean
+     */
+    boolean deleteFromMongo(long id);
 }

@@ -1,11 +1,9 @@
 package com.dhx.bi.controller;
 
-import cn.hutool.core.io.FileUtil;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dhx.bi.common.BaseResponse;
 import com.dhx.bi.common.ErrorCode;
 import com.dhx.bi.common.annotation.AuthCheck;
-import com.dhx.bi.common.constant.CommonConstant;
+import com.dhx.bi.common.constant.AIConstant;
 import com.dhx.bi.common.constant.UserConstant;
 import com.dhx.bi.common.exception.BusinessException;
 import com.dhx.bi.model.document.Chart;
@@ -17,17 +15,14 @@ import com.dhx.bi.model.DO.UserEntity;
 import com.dhx.bi.model.DTO.DeleteRequest;
 import com.dhx.bi.model.DTO.chart.*;
 import com.dhx.bi.model.enums.ChartStatusEnum;
-import com.dhx.bi.model.enums.FileUploadBizEnum;
 import com.dhx.bi.service.ChartService;
 import com.dhx.bi.service.UserService;
 import com.dhx.bi.utils.ExcelUtils;
 import com.dhx.bi.utils.ResultUtil;
-import com.dhx.bi.utils.SqlUtils;
 import com.dhx.bi.utils.ThrowUtils;
 import com.dhx.bi.webSocket.WebSocketServer;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
@@ -39,7 +34,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -94,7 +88,7 @@ public class ChartController {
         // 校验
         ThrowUtils.throwIf(StringUtils.isBlank(goal), ErrorCode.PARAMS_ERROR, "目标为空!");
         ThrowUtils.throwIf(StringUtils.isNotBlank(name) && name.length() > 100, ErrorCode.PARAMS_ERROR, "名称过长!");
-        checkFile(multipartFile);
+        ExcelUtils.checkExcelFile(multipartFile);
         // 获取CSV
         String csvData = ExcelUtils.excel2CSV(multipartFile);
         // 构造用户输入
@@ -122,7 +116,7 @@ public class ChartController {
         3号,30
         */
 //        String result = aiManager.doChat(userInput.toString(), AIConstant.BI_MODEL_ID);
-        String result = aiManager.chatAndGenChart(goal,chartType,csvData);
+        String result = aiManager.chatAndGenChart(goal, chartType, csvData);
         String[] split = result.split("【【【【【");
         // 第一个是 空字符串
         if (split.length < 3) {
@@ -172,7 +166,7 @@ public class ChartController {
         // 校验
         ThrowUtils.throwIf(StringUtils.isBlank(goal), ErrorCode.PARAMS_ERROR, "目标为空!");
         ThrowUtils.throwIf(StringUtils.isNotBlank(name) && name.length() > 100, ErrorCode.PARAMS_ERROR, "名称过长!");
-        checkFile(multipartFile);
+        ExcelUtils.checkExcelFile(multipartFile);
         // 获取用户信息
         UserEntity user = userService.getLoginUser();
         redisLimiterManager.doRateLimit("genChartByAi_" + user.getUserId());
@@ -190,7 +184,7 @@ public class ChartController {
         ThrowUtils.throwIf(!save, ErrorCode.SYSTEM_ERROR, "图表保存失败");
         // 2.submit task to thread pool
         long newChartId = chartEntity.getId();
-        biMqMessageProducer.sendMessage(String.valueOf(newChartId));
+        biMqMessageProducer.sendGenChartMessage(String.valueOf(newChartId));
         BiResponse biResponse = new BiResponse();
         biResponse.setChartId(newChartId);
         return ResultUtil.success(biResponse);
@@ -207,7 +201,7 @@ public class ChartController {
         // 校验
         ThrowUtils.throwIf(StringUtils.isBlank(goal), ErrorCode.PARAMS_ERROR, "目标为空!");
         ThrowUtils.throwIf(StringUtils.isNotBlank(name) && name.length() > 100, ErrorCode.PARAMS_ERROR, "名称过长!");
-        checkFile(multipartFile);
+        ExcelUtils.checkExcelFile(multipartFile);
         // 获取用户信息
         UserEntity user = userService.getLoginUser();
         // 读取文件信息
@@ -221,7 +215,6 @@ public class ChartController {
         chartEntity.setChartType(chartType);
         chartEntity.setChartData(csvData);
         boolean save = chartService.save(chartEntity);
-
         // 2.submit task to thread pool
         redisLimiterManager.doRateLimit("genChart_" + user.getUserId());
         try {
@@ -246,8 +239,8 @@ public class ChartController {
                 userInput.append(csvData).append("\n");
                 // 系统预设 ( 简单预设 )
                 /* 较好的做法是在系统（模型）层面做预设效果一般来说，会比直接拼接在用户消息里效果更好一些。*/
-//                String result = aiManager.doChat(userInput.toString(), AIConstant.BI_MODEL_ID);
-                String result = aiManager.chatAndGenChart(goal,chartType,csvData);
+                String result = aiManager.doChat(userInput.toString(), AIConstant.BI_MODEL_ID);
+//                String result = aiManager.chatAndGenChart(goal,chartType,csvData);
                 String[] split = result.split("【【【【【");
                 // 第一个是 空字符串
                 if (split.length < 3) {
@@ -333,7 +326,8 @@ public class ChartController {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean b = chartService.removeById(id);
-        return ResultUtil.success(b);
+        boolean result = chartService.deleteFromMongo(id);
+        return ResultUtil.success(b && result);
     }
 
     /**
@@ -354,6 +348,11 @@ public class ChartController {
         // 判断是否存在
         ChartEntity oldChartEntity = chartService.getById(id);
         ThrowUtils.throwIf(oldChartEntity == null, ErrorCode.NOT_FOUND_ERROR);
+        // 查看用户是否修改了原始数据 : 重新提交到AI服务进行图表生成
+        if (!oldChartEntity.getChartData().equals(chartUpdateRequest.getChartData())) {
+            // 发送消息到AI生成模块重新进行生成
+            biMqMessageProducer.sendGenChartMessage(String.valueOf(oldChartEntity.getId()));
+        }
         boolean result = chartService.updateById(chart);
         return ResultUtil.success(result);
     }
@@ -365,11 +364,11 @@ public class ChartController {
      * @return
      */
     @GetMapping("/get")
-    public BaseResponse<ChartEntity> getChartEntityById(long id, HttpServletRequest request) {
+    public BaseResponse<Chart> getChartEntityById(long id, HttpServletRequest request) {
         if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        ChartEntity chart = chartService.getById(id);
+        Chart chart = chartService.getChartByChartId(id);
         if (chart == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
@@ -387,9 +386,7 @@ public class ChartController {
         long size = chartQueryRequest.getPageSize();
         // 限制爬虫
         ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
-        Page<Chart> charts= chartService.getChartList(chartQueryRequest);
-//        Page<ChartEntity> chartPage = chartService.page(new Page<>(current, size),
-//                getQueryWrapper(chartQueryRequest));
+        Page<Chart> charts = chartService.getChartList(chartQueryRequest);
         return ResultUtil.success(charts);
     }
 
@@ -402,7 +399,7 @@ public class ChartController {
      */
     @PostMapping("/my/list/page")
     public BaseResponse<Page<Chart>> listMyChartEntityByPage(@RequestBody ChartQueryRequest chartQueryRequest,
-                                                                   HttpServletRequest request) {
+                                                             HttpServletRequest request) {
         if (chartQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -412,9 +409,7 @@ public class ChartController {
         long size = chartQueryRequest.getPageSize();
         // 限制爬虫
         ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
-        Page<Chart> charts= chartService.getChartList(chartQueryRequest);
-//        Page<ChartEntity> chartPage = chartService.page(new Page<>(current, size),
-//                getQueryWrapper(chartQueryRequest));
+        Page<Chart> charts = chartService.getChartList(chartQueryRequest);
         return ResultUtil.success(charts);
     }
 
@@ -444,76 +439,11 @@ public class ChartController {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean result = chartService.updateById(chart);
+        // 查看用户是否修改了原始数据 : 重新提交到AI服务进行图表生成
+        if (!oldChartEntity.getChartData().equals(chartEditRequest.getChartData())) {
+            // 发送消息到AI生成模块重新进行生成
+            biMqMessageProducer.sendGenChartMessage(String.valueOf(oldChartEntity.getId()));
+        }
         return ResultUtil.success(result);
     }
-
-    /**
-     * 获取查询包装类
-     *
-     * @param chartQueryRequest
-     * @return
-     */
-    private QueryWrapper<ChartEntity> getQueryWrapper(ChartQueryRequest chartQueryRequest) {
-        QueryWrapper<ChartEntity> queryWrapper = new QueryWrapper<>();
-        if (chartQueryRequest == null) {
-            return queryWrapper;
-        }
-        Long id = chartQueryRequest.getId();
-        String name = chartQueryRequest.getName();
-        String goal = chartQueryRequest.getGoal();
-        String chartType = chartQueryRequest.getChartType();
-        Long userId = chartQueryRequest.getUserId();
-        String sortField = chartQueryRequest.getSortField();
-        String sortOrder = chartQueryRequest.getSortOrder();
-
-        queryWrapper.eq(id != null && id > 0, "id", id);
-        queryWrapper.like(StringUtils.isNotBlank(name), "name", name);
-        queryWrapper.eq(StringUtils.isNotBlank(goal), "goal", goal);
-        queryWrapper.eq(StringUtils.isNotBlank(chartType), "chart_type", chartType);
-        queryWrapper.eq(ObjectUtils.isNotEmpty(userId), "user_id", userId);
-        queryWrapper.eq("is_delete", false);
-        queryWrapper.orderBy(SqlUtils.validSortField(sortField), sortOrder.equals(CommonConstant.SORT_ORDER_ASC),
-                sortField);
-        return queryWrapper;
-    }
-
-    /**
-     * 校验文件
-     *
-     * @param multipartFile
-     * @param fileUploadBizEnum 业务类型
-     */
-    private void validFile(MultipartFile multipartFile, FileUploadBizEnum fileUploadBizEnum) {
-        // 文件大小
-        long fileSize = multipartFile.getSize();
-        // 文件后缀
-        String fileSuffix = FileUtil.getSuffix(multipartFile.getOriginalFilename());
-        final long TWO_M = 1024 * 1024L * 2;
-        if (FileUploadBizEnum.USER_AVATAR.equals(fileUploadBizEnum)) {
-            if (fileSize > TWO_M) {
-                throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件大小不能超过 2M");
-            }
-            if (!Arrays.asList("jpeg", "jpg", "svg", "png", "webp").contains(fileSuffix)) {
-                throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件类型错误");
-            }
-        }
-    }
-
-    /**
-     * 检查文件
-     *
-     * @param file 文件
-     */
-    private void checkFile(MultipartFile file) {
-        long size = file.getSize();
-        String originalFilename = file.getOriginalFilename();
-        // 校验文件大小
-        final long ONE_MB = 1024 * 1024L;
-        ThrowUtils.throwIf(size > ONE_MB, ErrorCode.PARAMS_ERROR, "文件超过 1M");
-        // 校验文件后缀 aaa.png
-        String suffix = FileUtil.getSuffix(originalFilename);
-        final List<String> validFileSuffixList = Arrays.asList("xlsx", "xls");
-        ThrowUtils.throwIf(!validFileSuffixList.contains(suffix), ErrorCode.PARAMS_ERROR, "文件后缀非法");
-    }
-
 }

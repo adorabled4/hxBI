@@ -74,6 +74,13 @@ public class ChartServiceImpl extends ServiceImpl<ChartMapper, ChartEntity>
         }
     }
 
+    /**
+     * 排除旧版本和构建返回Page
+     *
+     * @param charts   图表
+     * @param pageable 可分页
+     * @return {@link Page}<{@link Chart}>
+     */
     private Page<Chart> excludeOldVersionAndBuildPage(List<Chart> charts, Pageable pageable) {
         long count = chartRepository.count();
         // 排除旧版本号Chart
@@ -133,6 +140,11 @@ public class ChartServiceImpl extends ServiceImpl<ChartMapper, ChartEntity>
             log.error("保存Chart到MongoDB失败 : {} , 异常信息:{} ", chartEntity, e.getMessage());
             return false;
         }
+    }
+
+    @Override
+    public boolean deleteFromMongo(long id) {
+        return chartRepository.deleteAllByChartId(id);
     }
 
     /**

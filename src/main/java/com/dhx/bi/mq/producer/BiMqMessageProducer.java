@@ -17,7 +17,12 @@ public class BiMqMessageProducer {
     @Resource
     RabbitTemplate rabbitTemplate;
 
-    public void sendMessage(String message){
+    /**
+     * 发送生成图表消息
+     *
+     * @param message 消息
+     */
+    public void sendGenChartMessage(String message){
         rabbitTemplate.convertAndSend(BiMqConstant.BI_EXCHANGE_NAME,BiMqConstant.BI_ROUTING_KEY,message);
     }
 }

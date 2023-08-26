@@ -19,4 +19,7 @@ public interface ChartRepository extends MongoRepository<Chart,String> {
     @Query("{'userId': ?0}")
     List<Chart> findAllByUserId(long userId,Pageable pageable);
 
+
+    boolean deleteAllByChartId(long chartId);
+
 }
