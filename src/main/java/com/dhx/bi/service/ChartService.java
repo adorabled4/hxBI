@@ -75,4 +75,12 @@ public interface ChartService extends IService<ChartEntity> {
     boolean updateDocument(Chart chart);
 
     QueryWrapper<ChartEntity> getQueryWrapper(ChartQueryRequest chartQueryRequest);
+
+    /**
+     * 同步Chart数据到MongoDB
+     *
+     * @param chartEntity 表实体
+     * @return boolean
+     */
+    boolean syncChart(ChartEntity chartEntity);
 }

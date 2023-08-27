@@ -47,4 +47,5 @@ public class RedisConstant {
     public static final String INTERFACE_RANK_KEY = "interface:rank";
     public static final String VERIFY_CODE_KEY = "user:verifycode:";
     public static final long VERIFY_CODE_TTL = 60*5L;
+    public static final String GEN_CHART_LIMIT_KEY = "gen:chart:limit:";
 }

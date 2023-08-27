@@ -53,6 +53,20 @@ public class ChartServiceImpl extends ServiceImpl<ChartMapper, ChartEntity>
     }
 
     @Override
+    public boolean syncChart(ChartEntity chartEntity) {
+        Chart chart = BeanUtil.copyProperties(chartEntity, Chart.class);
+        chart.setChartId(chartEntity.getId());
+        Long chartId = chart.getChartId();
+        List<Chart> charts = chartRepository.findAllByChartId(chartId);
+        if(charts.size()!=0){
+            return updateDocument(chart);
+        }else{
+            Chart save = chartRepository.save(chart);
+            return true;
+        }
+    }
+
+    @Override
     public List<Chart> listDocuments(long userId) {
         return chartRepository.findAllByUserId(userId, PageRequest.of(3, 1));
     }
