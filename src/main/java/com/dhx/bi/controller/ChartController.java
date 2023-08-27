@@ -1,5 +1,6 @@
 package com.dhx.bi.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dhx.bi.common.BaseResponse;
 import com.dhx.bi.common.ErrorCode;
 import com.dhx.bi.common.annotation.AuthCheck;
@@ -68,6 +69,26 @@ public class ChartController {
 
     @Resource
     private WebSocketServer webSocketServer;
+
+
+    @PostMapping("/list/chart/unsucceed")
+    public BaseResponse<com.baomidou.mybatisplus.extension.plugins.pagination.Page> getUnsucceedChart(@RequestBody ChartQueryRequest chartQueryRequest){
+        if (chartQueryRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        UserEntity loginUser = userService.getLoginUser();
+        chartQueryRequest.setUserId(loginUser.getUserId());
+        long current = chartQueryRequest.getCurrent();
+        long size = chartQueryRequest.getPageSize();
+        // 限制爬虫
+        ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
+        QueryWrapper<ChartEntity> wrapper = chartService.getQueryWrapper(chartQueryRequest);
+        wrapper.ne("status",ChartStatusEnum.SUCCEED.getStatus());
+        com.baomidou.mybatisplus.extension.plugins.pagination.Page<ChartEntity> page = chartService.page(new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(current, size),
+                wrapper);
+        return ResultUtil.success(page);
+
+    }
 
     /**
      * 智能图表(同步)

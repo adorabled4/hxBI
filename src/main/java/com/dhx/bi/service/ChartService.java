@@ -1,5 +1,6 @@
 package com.dhx.bi.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dhx.bi.model.DO.ChartEntity;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.dhx.bi.model.DTO.chart.ChartQueryRequest;
@@ -72,4 +73,6 @@ public interface ChartService extends IService<ChartEntity> {
      * @return boolean
      */
     boolean updateDocument(Chart chart);
+
+    QueryWrapper<ChartEntity> getQueryWrapper(ChartQueryRequest chartQueryRequest);
 }
