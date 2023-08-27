@@ -2,30 +2,41 @@ package com.dhx.bi.controller;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.RandomUtil;
+import com.aliyun.oss.OSSClient;
+import com.aliyun.oss.model.ObjectMetadata;
+import com.aliyun.oss.model.PutObjectResult;
 import com.dhx.bi.common.BaseResponse;
 import com.dhx.bi.common.ErrorCode;
 import com.dhx.bi.common.annotation.AuthCheck;
 import com.dhx.bi.common.constant.RedisConstant;
 import com.dhx.bi.common.constant.UserConstant;
 import com.dhx.bi.common.exception.BusinessException;
+import com.dhx.bi.config.OSSConfig;
+import com.dhx.bi.manager.OssManager;
 import com.dhx.bi.model.DO.UserEntity;
+import com.dhx.bi.model.DTO.FileUploadResult;
 import com.dhx.bi.model.DTO.user.*;
 import com.dhx.bi.model.VO.UserVO;
 import com.dhx.bi.model.enums.MailEnum;
 import com.dhx.bi.service.MessageService;
 import com.dhx.bi.service.UserService;
 import com.dhx.bi.utils.ResultUtil;
+import com.dhx.bi.utils.ThrowUtils;
 import com.dhx.bi.utils.UserHolder;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -49,6 +60,8 @@ public class UserController {
     @Resource
     StringRedisTemplate stringRedisTemplate;
 
+    @Resource
+    OssManager ossManager;
 
     @PostMapping("/login/email")
     @ApiOperation("用户登录-email")
@@ -72,7 +85,8 @@ public class UserController {
         }
         String email = param.getEmail();
         String code = param.getCode();
-        verifyCode(code, email);;
+        verifyCode(code, email);
+        ;
         return userService.quickLogin(email);
     }
 
@@ -169,12 +183,23 @@ public class UserController {
 
     @PostMapping("/update")
     @ApiOperation("更新用户")
-    public BaseResponse updateUserInfo(@RequestBody UserVO userVO) {
-        if (userVO == null) {
+    public BaseResponse updateUserInfo(@RequestPart("file") MultipartFile multipartFile, UserUpdateRequest param) {
+        if (multipartFile != null) {
+            // 执行更新用户图像操作
+            FileUploadResult result = ossManager.uploadImage(multipartFile);
+            ThrowUtils.throwIf(result.getStatus().equals("error"), ErrorCode.SYSTEM_ERROR, "上传头像失败!");
+            String url = result.getName();
+            param.setAvatarUrl(url);
+        }
+        if (param == null) {
             return ResultUtil.error(ErrorCode.PARAMS_ERROR);
         }
-        UserEntity userEntity = BeanUtil.copyProperties(userVO, UserEntity.class);
-        return ResultUtil.success(userService.updateById(userEntity));
+        UserEntity userEntity = BeanUtil.copyProperties(param, UserEntity.class);
+        UserDTO user = UserHolder.getUser();
+        userEntity.setUserId(user.getUserId());
+        boolean b = userService.updateById(userEntity);
+        ThrowUtils.throwIf(!b, ErrorCode.SYSTEM_ERROR, "更新用户信息失败!");
+        return ResultUtil.success("更新成功!");
     }
 
     @GetMapping("/current")
@@ -210,7 +235,7 @@ public class UserController {
     private void verifyCode(String code, String email) {
         String codeKey = RedisConstant.VERIFY_CODE_KEY + email;
         String realCodeValue = stringRedisTemplate.opsForValue().get(codeKey);
-        if(StringUtils.isBlank(realCodeValue)){
+        if (StringUtils.isBlank(realCodeValue)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "请重新发送验证码!");
         }
         String[] split = realCodeValue.split("-");
@@ -219,6 +244,7 @@ public class UserController {
             throw new BusinessException(ErrorCode.FORBIDDEN_ERROR, "验证码错误!");
         }
     }
+
 
 
 }
