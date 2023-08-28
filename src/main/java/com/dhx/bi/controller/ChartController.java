@@ -1,5 +1,6 @@
 package com.dhx.bi.controller;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dhx.bi.common.BaseResponse;
 import com.dhx.bi.common.ErrorCode;
@@ -7,6 +8,7 @@ import com.dhx.bi.common.annotation.AuthCheck;
 import com.dhx.bi.common.constant.RedisConstant;
 import com.dhx.bi.common.constant.UserConstant;
 import com.dhx.bi.common.exception.BusinessException;
+import com.dhx.bi.model.VO.ChartVO;
 import com.dhx.bi.model.document.Chart;
 import com.dhx.bi.mq.producer.BiMqMessageProducer;
 import com.dhx.bi.manager.AiManager;
@@ -35,8 +37,10 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
 
 /**
  * @author adorabled4
@@ -88,6 +92,30 @@ public class ChartController {
                 wrapper);
         return ResultUtil.success(page);
 
+    }
+
+    @PostMapping("/list/chart/all")
+    public BaseResponse<com.baomidou.mybatisplus.extension.plugins.pagination.Page> getAllCharts(@RequestBody ChartQueryRequest chartQueryRequest) {
+        if (chartQueryRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        UserEntity loginUser = userService.getLoginUser();
+        chartQueryRequest.setUserId(loginUser.getUserId());
+        long current = chartQueryRequest.getCurrent();
+        long size = chartQueryRequest.getPageSize();
+        // 限制爬虫
+        ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
+        QueryWrapper<ChartEntity> wrapper = chartService.getQueryWrapper(chartQueryRequest);
+        com.baomidou.mybatisplus.extension.plugins.pagination.Page<ChartEntity> page =
+                chartService.page(new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(current, size), wrapper);
+        List<ChartVO> chartVOS = page.getRecords().stream().map(item -> {
+            ChartVO chartVO = BeanUtil.copyProperties(item, ChartVO.class);
+            return chartVO;
+        }).collect(Collectors.toList());
+        com.baomidou.mybatisplus.extension.plugins.pagination.Page newPage = BeanUtil.copyProperties(page, com.baomidou.mybatisplus.extension.plugins.pagination.Page.class);
+        newPage.setRecords(chartVOS);
+//        com.baomidou.mybatisplus.extension.plugins.pagination.Page<ChartVO> newPage=chartService.buildPage(page,chartVOS);
+        return ResultUtil.success(newPage);
     }
 
     @GetMapping("/regen/chart")

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dhx.bi.model.DO.ChartEntity;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.dhx.bi.model.DTO.chart.ChartQueryRequest;
+import com.dhx.bi.model.VO.ChartVO;
 import com.dhx.bi.model.document.Chart;
 import org.springframework.data.domain.Page;
 
@@ -83,4 +84,13 @@ public interface ChartService extends IService<ChartEntity> {
      * @return boolean
      */
     boolean syncChart(ChartEntity chartEntity);
+
+    /**
+     * 构建页面
+     *
+     * @param page     页面
+     * @param chartVOS 图表vos
+     * @return {@link com.baomidou.mybatisplus.extension.plugins.pagination.Page}<{@link ChartVO}>
+     */
+    com.baomidou.mybatisplus.extension.plugins.pagination.Page<ChartVO> buildPage(com.baomidou.mybatisplus.extension.plugins.pagination.Page<ChartEntity> page, List<ChartVO> chartVOS);
 }

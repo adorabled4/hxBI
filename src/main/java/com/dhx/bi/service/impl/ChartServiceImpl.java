@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.dhx.bi.common.constant.CommonConstant;
 import com.dhx.bi.model.DO.ChartEntity;
 import com.dhx.bi.model.DTO.chart.ChartQueryRequest;
+import com.dhx.bi.model.VO.ChartVO;
 import com.dhx.bi.model.document.Chart;
 import com.dhx.bi.repository.ChartRepository;
 import com.dhx.bi.service.ChartService;
@@ -230,6 +231,20 @@ public class ChartServiceImpl extends ServiceImpl<ChartMapper, ChartEntity>
         queryWrapper.orderBy(SqlUtils.validSortField(sortField), sortOrder.equals(CommonConstant.SORT_ORDER_ASC),
                 sortField);
         return queryWrapper;
+    }
+
+    @Override
+    public com.baomidou.mybatisplus.extension.plugins.pagination.Page<ChartVO> buildPage(com.baomidou.mybatisplus.extension.plugins.pagination.Page<ChartEntity> page, List<ChartVO> chartVOS) {
+        long total = page.getTotal();
+        long current = page.getCurrent();
+        long size = page.getSize();
+        com.baomidou.mybatisplus.extension.plugins.pagination.Page<ChartVO> newPage =
+                new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(current, size);
+        newPage.setTotal(total);
+        newPage.setSize(size);
+        newPage.setCurrent(current);
+        newPage.setRecords(chartVOS);
+        return newPage;
     }
 }
 
