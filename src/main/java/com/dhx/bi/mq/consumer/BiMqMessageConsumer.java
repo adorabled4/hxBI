@@ -51,8 +51,8 @@ public class BiMqMessageConsumer {
 
     //    @RabbitListener(queues = BiMqConstant.BI_QUEUE_NAME, ackMode = "MANUAL")
     @RabbitListener(bindings = @QueueBinding(value = @Queue(name = BiMqConstant.BI_QUEUE_NAME), exchange = @Exchange(name = BiMqConstant.BI_EXCHANGE_NAME, type = ExchangeTypes.DIRECT), key = BiMqConstant.BI_ROUTING_KEY))
-//    @Retryable(value = GenChartException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000 * 60))
-    private void receiveMessage(String message, Channel channel, @Header(AmqpHeaders.DELIVERY_TAG) long deliverTag) throws IOException {
+    @Retryable(value = GenChartException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000 * 60))
+    public void receiveMessage(String message, Channel channel, @Header(AmqpHeaders.DELIVERY_TAG) long deliverTag) throws IOException {
         log.info("receive message :{}", message);
         if (StringUtils.isBlank(message)) {
             // reject message
