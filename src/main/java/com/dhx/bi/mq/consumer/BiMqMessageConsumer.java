@@ -9,6 +9,7 @@ import com.dhx.bi.manager.AiManager;
 import com.dhx.bi.model.DO.ChartEntity;
 import com.dhx.bi.model.enums.ChartStatusEnum;
 import com.dhx.bi.service.ChartService;
+import com.dhx.bi.utils.ChartUtil;
 import com.dhx.bi.utils.ThrowUtils;
 import com.dhx.bi.webSocket.WebSocketServer;
 import com.rabbitmq.client.Channel;
@@ -73,7 +74,7 @@ public class BiMqMessageConsumer {
             boolean b = chartService.updateById(genChartEntity);
             // throw异常
             ThrowUtils.throwIf(!b, new BusinessException(ErrorCode.SYSTEM_ERROR, "修改图表状态信息失败 " + chartId));
-            String userInput = buildUserInput(chartEntity);
+            String userInput = ChartUtil.buildUserInput(chartEntity);
             // 系统预设 ( 简单预设 )
             /* 较好的做法是在系统（模型）层面做预设效果一般来说，会比直接拼接在用户消息里效果更好一些。*/
             String result = aiManager.doChat(userInput.toString(), AIConstant.BI_MODEL_ID);
@@ -89,7 +90,7 @@ public class BiMqMessageConsumer {
             // 图表代码
             String genChart = split[1].trim();
             // 压缩JSON数据
-            String compressedChart = compressJson(genChart);
+            String compressedChart = ChartUtil.compressJson(genChart);
             // 分析结果
             String genResult = split[2].trim();
             // 更新数据
@@ -136,41 +137,6 @@ public class BiMqMessageConsumer {
         log.info(String.format("图表ID:%d 已超过最大重试次数, 已更新图表执行信息", e.getChartId()));
     }
 
-    /**
-     * 建立用户输入 (单条消息)
-     *
-     * @param chart 图表
-     * @return {@link String}
-     */
-    private String buildUserInput(ChartEntity chart) {
-        // 获取CSV
-        // 构造用户输入
-        StringBuilder userInput = new StringBuilder("");
-        // 拼接图表类型;
-        String userGoal = chart.getGoal();
-        String chartType = chart.getChartType();
-        String csvData = chart.getChartData();
-        if (StringUtils.isNotBlank(chartType)) {
-            userGoal += ", 请使用 " + chartType;
-        }
-        userInput.append("分析需求: ").append('\n');
-        userInput.append(userGoal).append("\n");
-        userInput.append("原始数据：").append("\n");
-        userInput.append(csvData).append("\n");
-        return userInput.toString();
-    }
 
-    /**
-     * 压缩json
-     *
-     * @param data 数据
-     * @return {@link String}
-     */
-    public String compressJson(String data) {
-        data = data.replaceAll("\t+", "");
-        data = data.replaceAll(" +", "");
-        data = data.replaceAll("\n+", "");
-        return data;
-    }
 
 }

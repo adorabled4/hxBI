@@ -2,7 +2,13 @@ package com.dhx.bi.service.execution;
 
 import com.dhx.bi.model.DO.ChartEntity;
 import com.dhx.bi.model.DTO.chart.BiResponse;
+import com.dhx.bi.mq.producer.BiMqMessageProducer;
 import com.dhx.bi.service.GenChartStrategy;
+import com.dhx.bi.utils.ResultUtil;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
 
 /**
  * 通过MQ异步消息生成
@@ -11,10 +17,19 @@ import com.dhx.bi.service.GenChartStrategy;
  * @className GenChartSync
  * @date 2023/08/30
  */
+@Service
 public class GenChartMQ implements GenChartStrategy {
+
+    @Resource
+    BiMqMessageProducer biMqMessageProducer;
+
 
     @Override
     public BiResponse executeGenChart(ChartEntity chartEntity) {
-        return null;
+        long newChartId = chartEntity.getId();
+        biMqMessageProducer.sendGenChartMessage(String.valueOf(newChartId));
+        BiResponse biResponse = new BiResponse();
+        biResponse.setChartId(newChartId);
+        return biResponse;
     }
 }
