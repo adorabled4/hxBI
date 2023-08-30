@@ -60,19 +60,10 @@ public class ChartController {
     private UserService userService;
 
     @Resource
-    private AiManager aiManager;
-
-    @Resource
-    private ThreadPoolExecutor threadPoolExecutor;
-
-    @Resource
     private RedisLimiterManager redisLimiterManager;
 
     @Resource
     private BiMqMessageProducer biMqMessageProducer;
-
-    @Resource
-    private WebSocketServer webSocketServer;
 
     @Resource
     StrategySelector selector;
@@ -140,87 +131,6 @@ public class ChartController {
     }
 
     /**
-     * 智能图表(同步)
-     *
-     * @param multipartFile 数据文件
-     * @param chartRequest  图要求
-     * @return {@link BaseResponse}<{@link BiResponse}>
-     */
-//    @PostMapping("/gen")
-//    @Deprecated
-//    public BaseResponse<BiResponse> getChartByAiSync(@RequestPart("file") MultipartFile multipartFile,
-//                                                     GenChartByAIRequest chartRequest) {
-//        // 取出数据
-//        String chartType = chartRequest.getChartType();
-//        String name = chartRequest.getName();
-//        String goal = chartRequest.getGoal();
-//        // 获取用户信息
-//        UserEntity user = userService.getLoginUser();
-//        // 校验
-//        ThrowUtils.throwIf(StringUtils.isBlank(goal), ErrorCode.PARAMS_ERROR, "目标为空!");
-//        ThrowUtils.throwIf(StringUtils.isNotBlank(name) && name.length() > 100, ErrorCode.PARAMS_ERROR, "名称过长!");
-//        ExcelUtils.checkExcelFile(multipartFile);
-//        // 获取CSV
-//        String csvData = ExcelUtils.excel2CSV(multipartFile);
-//        // 构造用户输入
-//        StringBuilder userInput = new StringBuilder("");
-//        // 拼接图表类型;
-//        String userGoal = goal;
-//        if (StringUtils.isNotBlank(chartType)) {
-//            userGoal += ", 请使用 " + chartType;
-//        }
-//        userInput.append("分析需求: ").append('\n');
-//        userInput.append(userGoal).append("\n");
-//        userInput.append("原始数据：").append("\n");
-//        userInput.append(csvData).append("\n");
-//
-//        // 系统预设 ( 简单预设 )
-//        /* 较好的做法是在系统（模型）层面做预设效果一般来说，会比直接拼接在用户消息里效果更好一些。*/
-//
-//        /*
-//        分析需求：
-//        分析网站用户的增长情况
-//        原始数据：
-//        日期,用户数
-//        1号,10
-//        2号,20
-//        3号,30
-//        */
-////        String result = aiManager.doChat(userInput.toString(), AIConstant.BI_MODEL_ID);
-//        String result = aiManager.chatAndGenChart(goal, chartType, csvData);
-//        String[] split = result.split("【【【【【");
-//        // 第一个是 空字符串
-//        if (split.length < 3) {
-//            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "AI 生成错误!");
-//        }
-//        // 图表代码
-//        String genChart = split[1].trim();
-//        // 分析结果
-//        String genResult = split[2].trim();
-//        // 插入数据到数据库
-//        ChartEntity chartEntity = new ChartEntity();
-//        chartEntity.setUserId(user.getUserId());
-//        chartEntity.setName(name);
-//        chartEntity.setGoal(goal);
-//        chartEntity.setChartData(csvData);
-//        chartEntity.setChartType(chartType);
-//        chartEntity.setGenChart(genChart);
-//        chartEntity.setGenResult(genResult);
-//        boolean save = chartService.save(chartEntity);
-//        boolean syncResult = chartService.syncChart(chartEntity);
-//        ThrowUtils.throwIf(!save&&syncResult, ErrorCode.SYSTEM_ERROR, "图表保存失败!");
-//
-//        // 封装返回结果
-//        BiResponse biResponse = new BiResponse();
-//        biResponse.setGenChart(genChart);
-//        biResponse.setGenResult(genResult);
-//
-//        // todo 图表原始数据压缩 (AI接口普遍有字数限制)
-//        return ResultUtil.success(biResponse);
-//    }
-
-
-    /**
      * 智能图表(异步) : 消息队列
      *
      * @param multipartFile 数据文件
@@ -267,100 +177,6 @@ public class ChartController {
         }
         return ResultUtil.success(biResponse);
     }
-
-//    @PostMapping("/gen/async")
-//    public BaseResponse<BiResponse> getChartByAiAsync(@RequestPart("file") MultipartFile multipartFile,
-//                                                      GenChartByAIRequest chartRequest) {
-//        // 1.save chat(Not Generated)
-//        // 取出数据
-//        String chartType = chartRequest.getChartType();
-//        String name = chartRequest.getName();
-//        String goal = chartRequest.getGoal();
-//        // 校验
-//        ThrowUtils.throwIf(StringUtils.isBlank(goal), ErrorCode.PARAMS_ERROR, "目标为空!");
-//        ThrowUtils.throwIf(StringUtils.isNotBlank(name) && name.length() > 100, ErrorCode.PARAMS_ERROR, "名称过长!");
-//        ExcelUtils.checkExcelFile(multipartFile);
-//        // 获取用户信息
-//        UserEntity user = userService.getLoginUser();
-//        // 读取文件信息
-//        String csvData = ExcelUtils.excel2CSV(multipartFile);
-//        // 插入数据到数据库
-//        ChartEntity chartEntity = new ChartEntity();
-//        chartEntity.setUserId(user.getUserId());
-//        chartEntity.setName(name);
-//        chartEntity.setGoal(goal);
-//        chartEntity.setStatus(ChartStatusEnum.WAIT.getStatus());
-//        chartEntity.setChartType(chartType);
-//        chartEntity.setChartData(csvData);
-//        boolean save = chartService.save(chartEntity);
-//        // 2.submit task to thread pool
-//        redisLimiterManager.doRateLimit("genChart_" + user.getUserId());
-//        try {
-//            CompletableFuture.runAsync(() -> {
-//                ChartEntity genChartEntity = new ChartEntity();
-//                genChartEntity.setId(chartEntity.getId());
-//                genChartEntity.setStatus(ChartStatusEnum.RUNNING.getStatus());
-//                boolean b = chartService.updateById(genChartEntity);
-//                // 处理异常
-//                ThrowUtils.throwIf(!b, new BusinessException(ErrorCode.SYSTEM_ERROR, "修改图表状态信息失败 " + chartEntity.getId()));
-//                // 获取CSV
-//                // 构造用户输入
-//                StringBuilder userInput = new StringBuilder("");
-//                // 拼接图表类型;
-//                String userGoal = goal;
-//                if (StringUtils.isNotBlank(chartType)) {
-//                    userGoal += ", 请使用 " + chartType;
-//                }
-//                userInput.append("分析需求: ").append('\n');
-//                userInput.append(userGoal).append("\n");
-//                userInput.append("原始数据：").append("\n");
-//                userInput.append(csvData).append("\n");
-//                // 系统预设 ( 简单预设 )
-//                /* 较好的做法是在系统（模型）层面做预设效果一般来说，会比直接拼接在用户消息里效果更好一些。*/
-//                String result = aiManager.doChat(userInput.toString(), AIConstant.BI_MODEL_ID);
-////                String result = aiManager.chatAndGenChart(goal,chartType,csvData);
-//                String[] split = result.split("【【【【【");
-//                // 第一个是 空字符串
-//                if (split.length < 3) {
-//                    throw new BusinessException(ErrorCode.SYSTEM_ERROR, "AI 生成错误!");
-//                }
-//                // 图表代码
-//                String genChart = split[1].trim();
-//                // 分析结果
-//                String genResult = split[2].trim();
-//                String compressJson = compressJson(genChart);
-//                // 更新数据
-//                ChartEntity updateChartResult = new ChartEntity();
-//                updateChartResult.setId(chartEntity.getId());
-//                updateChartResult.setGenChart(compressJson);
-//                updateChartResult.setGenResult(genResult);
-//                updateChartResult.setStatus(ChartStatusEnum.SUCCEED.getStatus());
-//                boolean updateGenResult = chartService.updateById(updateChartResult);
-//                boolean syncResult = chartService.syncChart(chartEntity);
-//                ThrowUtils.throwIf(!updateGenResult && syncResult, ErrorCode.SYSTEM_ERROR, "生成图表保存失败!");
-//                try {
-//                    webSocketServer.sendMessage("您的[" + chartEntity.getName() + "]生成成功 , 前往 我的图表 进行查看",
-//                            new HashSet<>(Arrays.asList(chartEntity.getUserId().toString())));
-//                } catch (IOException e) {
-//                    throw new RuntimeException(e);
-//                }
-//            }, threadPoolExecutor);
-//
-//        } catch (BusinessException e) {
-//            ChartEntity updateChartResult = new ChartEntity();
-//            updateChartResult.setId(chartEntity.getId());
-//            updateChartResult.setStatus(ChartStatusEnum.FAILED.getStatus());
-//            updateChartResult.setExecMessage(e.getDescription());
-//            boolean updateResult = chartService.updateById(updateChartResult);
-//            if (!updateResult) {
-//                log.info("更新图表FAILED状态信息失败 , chatId:{}", updateChartResult.getId());
-//            }
-//        }
-//        // return
-//        BiResponse biResponse = new BiResponse();
-//        biResponse.setChartId(chartEntity.getId());
-//        return ResultUtil.success(biResponse);
-//    }
 
     /**
      * 创建
@@ -532,16 +348,4 @@ public class ChartController {
         return ResultUtil.success(result);
     }
 
-    /**
-     * 压缩json
-     *
-     * @param data 数据
-     * @return {@link String}
-     */
-    public String compressJson(String data) {
-        data = data.replaceAll("\t+", "");
-        data = data.replaceAll(" +", "");
-        data = data.replaceAll("\n+", "");
-        return data;
-    }
 }
