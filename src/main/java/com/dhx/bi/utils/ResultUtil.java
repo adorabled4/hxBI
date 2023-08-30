@@ -31,6 +31,17 @@ public class ResultUtil implements Serializable{
 		return new BaseResponse<T>(200,data,"ok","");
 	}
 
+	/**
+	 * 正常返回
+	 *
+	 * @param data        数据
+	 * @param description 描述
+	 * @return {@link BaseResponse}<{@link T}>
+	 */
+	public static <T> BaseResponse<T> success(T data,String description){
+		return new BaseResponse<T>(200,data,"ok",description);
+	}
+
 
 	/**
 	 * 出现错误

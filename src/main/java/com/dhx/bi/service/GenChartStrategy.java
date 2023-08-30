@@ -10,5 +10,11 @@ import com.dhx.bi.model.DTO.chart.BiResponse;
  **/
 public interface GenChartStrategy {
 
+    /**
+     * 执行图表生成
+     *
+     * @param chartEntity 表实体
+     * @return {@link BiResponse}
+     */
     BiResponse executeGenChart(ChartEntity chartEntity);
 }

@@ -5,7 +5,7 @@ import com.dhx.bi.common.exception.BusinessException;
 import com.dhx.bi.model.DO.ChartEntity;
 import com.dhx.bi.model.DTO.chart.BiResponse;
 import com.dhx.bi.service.GenChartStrategy;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 /**
  * 拒绝策略
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
  * @className GenChartSync
  * @date 2023/08/30
  */
-@Service
+@Component(value = "gen_reject")
 public class GenChartReject implements GenChartStrategy {
 
     @Override

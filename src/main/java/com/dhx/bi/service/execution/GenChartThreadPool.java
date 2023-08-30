@@ -15,7 +15,7 @@ import com.dhx.bi.utils.ThrowUtils;
 import com.dhx.bi.webSocket.WebSocketServer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.io.IOException;
@@ -32,7 +32,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  * @date 2023/08/30
  */
 @Slf4j
-@Service
+@Component(value = "gen_thread_pool")
 public class GenChartThreadPool implements GenChartStrategy {
 
     @Resource

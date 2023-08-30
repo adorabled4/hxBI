@@ -2,20 +2,18 @@ package com.dhx.bi.service.execution;
 
 import com.dhx.bi.common.ErrorCode;
 import com.dhx.bi.common.constant.AIConstant;
-import com.dhx.bi.common.constant.BiMqConstant;
 import com.dhx.bi.common.exception.BusinessException;
+import com.dhx.bi.common.exception.GenChartException;
 import com.dhx.bi.manager.AiManager;
 import com.dhx.bi.model.DO.ChartEntity;
-import com.dhx.bi.model.DO.UserEntity;
 import com.dhx.bi.model.DTO.chart.BiResponse;
 import com.dhx.bi.model.enums.ChartStatusEnum;
 import com.dhx.bi.service.ChartService;
 import com.dhx.bi.service.GenChartStrategy;
 import com.dhx.bi.utils.ChartUtil;
-import com.dhx.bi.utils.ExcelUtils;
 import com.dhx.bi.utils.ThrowUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 
@@ -26,7 +24,9 @@ import javax.annotation.Resource;
  * @className GenChartSync
  * @date : 2023/08/30/ 11:46
  **/
-@Service
+@Component(value = "gen_sync")
+@Slf4j
+//@Component(value = GenChartStrategyEnum.GEN_SYNC.getValue())
 public class GenChartSync implements GenChartStrategy {
 
     @Resource
@@ -49,30 +49,44 @@ public class GenChartSync implements GenChartStrategy {
         3号,30
         */
 //        String result = aiManager.doChat(userInput.toString(), AIConstant.BI_MODEL_ID);
-        String userInput = ChartUtil.buildUserInput(chartEntity);
-        String result = aiManager.doChat(userInput, AIConstant.BI_MODEL_ID);
-        String[] split = result.split("【【【【【");
-        // 第一个是 空字符串
-        if (split.length < 3) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "AI 生成错误!");
+        try{
+            String userInput = ChartUtil.buildUserInput(chartEntity);
+            String result = aiManager.doChat(userInput, AIConstant.BI_MODEL_ID);
+            String[] split = result.split("【【【【【");
+            // 第一个是 空字符串
+            if (split.length < 3) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "AI 生成错误!");
+            }
+            // 图表代码
+            String genChart = split[1].trim();
+            // 分析结果
+            String genResult = split[2].trim();
+            // 更新数据到数据库
+            chartEntity.setGenChart(genChart);
+            chartEntity.setGenResult(genResult);
+            chartEntity.setStatus(ChartStatusEnum.SUCCEED.getStatus());
+            boolean save = chartService.updateById(chartEntity);
+            ThrowUtils.throwIf(!save, ErrorCode.SYSTEM_ERROR, "图表保存失败!");
+            boolean syncResult = chartService.syncChart(chartEntity);
+            ThrowUtils.throwIf(!syncResult, ErrorCode.SYSTEM_ERROR, "图表同步失败!");
+            // 封装返回结果
+            BiResponse biResponse = new BiResponse();
+            biResponse.setGenChart(genChart);
+            biResponse.setChartId(chartEntity.getId());
+            biResponse.setGenResult(genResult);
+            return biResponse;
+        } catch (BusinessException e) {
+            // 更新状态信息
+            ChartEntity updateChartResult = new ChartEntity();
+            updateChartResult.setId(chartEntity.getId());
+            updateChartResult.setStatus(ChartStatusEnum.FAILED.getStatus());
+            updateChartResult.setExecMessage(e.getDescription());
+            boolean updateResult = chartService.updateById(updateChartResult);
+            if (!updateResult) {
+                log.info("更新图表FAILED状态信息失败 , chatId:{}", updateChartResult.getId());
+            }
+            // 抛出异常进行日志打印
+            throw new GenChartException(chartEntity.getId(), e);
         }
-        // 图表代码
-        String genChart = split[1].trim();
-        // 分析结果
-        String genResult = split[2].trim();
-        // 更新数据到数据库
-        chartEntity.setGenChart(genChart);
-        chartEntity.setGenResult(genResult);
-        chartEntity.setStatus(ChartStatusEnum.SUCCEED.getStatus());
-        boolean save = chartService.save(chartEntity);
-        ThrowUtils.throwIf(!save, ErrorCode.SYSTEM_ERROR, "图表保存失败!");
-        boolean syncResult = chartService.syncChart(chartEntity);
-        ThrowUtils.throwIf(!syncResult, ErrorCode.SYSTEM_ERROR, "图表同步失败!");
-        // 封装返回结果
-        BiResponse biResponse = new BiResponse();
-        biResponse.setGenChart(genChart);
-        biResponse.setChartId(chartEntity.getId());
-        biResponse.setGenResult(genResult);
-        return biResponse;
     }
 }

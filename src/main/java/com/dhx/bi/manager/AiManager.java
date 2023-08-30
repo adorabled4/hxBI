@@ -37,6 +37,7 @@ public class AiManager {
         BaseResponse<DevChatResponse> response = yuClient.doChat(chatRequest);
         if (response == null) {
             log.error("AI 响应错误! 发送内容:{}", message);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "AI 响应错误!");
         }
         if (response.getCode() != 0) {
             log.error("AI 响应错误! 发送内容:{}, 返回内容:{}", message, response.getData());

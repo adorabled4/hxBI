@@ -4,9 +4,7 @@ import com.dhx.bi.model.DO.ChartEntity;
 import com.dhx.bi.model.DTO.chart.BiResponse;
 import com.dhx.bi.mq.producer.BiMqMessageProducer;
 import com.dhx.bi.service.GenChartStrategy;
-import com.dhx.bi.utils.ResultUtil;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 
@@ -17,7 +15,7 @@ import javax.annotation.Resource;
  * @className GenChartSync
  * @date 2023/08/30
  */
-@Service
+@Component(value = "gen_mq")
 public class GenChartMQ implements GenChartStrategy {
 
     @Resource

@@ -1,6 +1,7 @@
 package com.dhx.bi.utils;
 
 import java.lang.management.ManagementFactory;
+import com.dhx.bi.model.DTO.ServerLoadInfo;
 import com.sun.management.OperatingSystemMXBean;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.ThreadMXBean;
@@ -56,5 +57,11 @@ public class ServerMetricsUtil {
         } else {
             return false; // Provide service asynchronously
         }
+    }
+
+    public static ServerLoadInfo getLoadInfo() {
+        double cpuUsagePercentage = getCpuUsagePercentage();
+        double memoryUsagePercentage = getMemoryUsagePercentage();
+        return new ServerLoadInfo(cpuUsagePercentage,memoryUsagePercentage);
     }
 }
