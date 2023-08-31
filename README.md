@@ -42,7 +42,7 @@ adorabled4
 
 目前的主要业务流程
 
-<img src="http://oss.dhx.icu/dhx/image-20230831165848356.png" style="zoom:67%;" />
+<img src="C:/Users/dhx/Desktop/image-20230831165848356.png" style="zoom:67%;" />
 
 **下面我简单描述下部分扩展点的实现细节**
 
@@ -710,11 +710,32 @@ docker rmi hxbi:v1
 
 <img src="http://oss.dhx.icu/dhx/image-20230830182807085.png" style="zoom:67%;" />
 
-## 效果
+## 前端效果
 
-前端很丑 , 勿喷QAQ
+前端很丑 , 轻喷QAQ
 
-![image-20230831180011894](http://oss.dhx.icu/dhx/image-20230831180011894.png)
+![img](http://oss.dhx.icu/dhx/FqB8AS0JbjzW4rr0ehOp9sqwCauf.png)
+
+
+
+![img](http://oss.dhx.icu/dhx/FtIhKynmuysMFDYmHriSX_fK5Wyl.png)
+
+![](http://oss.dhx.icu/dhx/FgCTIzKGdKh5n0cFiomXAjBKMeEu.png)
+
+
+
+![](http://oss.dhx.icu/dhx/Fh3d_UOvBI3VeNJU-pReyWoYcmeZ.png)
+
+这里个人中心右边的板块还需要修改
+
+![](http://oss.dhx.icu/dhx/FkF86JlBiPQts33pkhisb3yqi1f5.png)
+
+
+
+![](http://oss.dhx.icu/dhx/FvFqwKbvP2kla0DyxZNMx9PPkZJe.png)
+
+![](http://oss.dhx.icu/dhx/Fo28JVyLLXBmPkxTvMKGnqAKh08Z.png)
+
 
 
 ## 贡献

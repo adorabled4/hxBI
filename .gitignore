@@ -34,3 +34,5 @@ build/
 
 # 排除日志
 logs
+
+assets
