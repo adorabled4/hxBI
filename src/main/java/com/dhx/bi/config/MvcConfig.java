@@ -33,6 +33,7 @@ public class MvcConfig implements WebMvcConfigurer {
         registry.addInterceptor(new ReFreshTokenInterceptor(stringRedisTemplate,jwtTokensService)).addPathPatterns("/**")
                 .excludePathPatterns(
                         "/**/login/**",
+                        "/**/send/code",
                         "/**/register/**",
                         "/**/doc.html/**",
                         "/static/**",
