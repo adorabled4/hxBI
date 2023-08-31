@@ -44,13 +44,13 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(BusinessException.class)
     public BaseResponse<Object> handleRRException(BusinessException e) {
-        log.error("BusinessException", e.getDescription());
+        log.error("BusinessException:{}", e.getDescription());
         return ResultUtil.error(e.getCode(), e.getMessage(), e.getDescription());
     }
 
     @ExceptionHandler(NoHandlerFoundException.class)
     public BaseResponse handlerNoFoundException(Exception e) {
-        log.error("RuntimeException", e);
+        log.error("RuntimeException:{}", e.getMessage());
         return ResultUtil.error(ErrorCode.NOT_FOUND);
     }
 
@@ -72,7 +72,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public BaseResponse handleException(Exception e) {
-        log.error("Exception", e);
+        log.error("Exception:{}", e.getMessage());
         return ResultUtil.error();
     }
 }

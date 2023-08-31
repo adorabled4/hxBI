@@ -13,8 +13,8 @@ RUN mkdir -p /app/hxBI
 # 将所有jar文件添加到对应模块的目录中 => 需要注意的是 , TODO 构建的时候是以dockerfile所在的目录开始的
 COPY jar/hxBI.jar /app/hxBI
 
-# 暴露端口号 (gateway)
-EXPOSE 9001
+# 暴露端口号
+EXPOSE 6848
 
 # 运行所有jar文件
 CMD ["sh", "-c", "java -jar /app/hxBI/hxBI.jar --spring.profiles.active=prod"]

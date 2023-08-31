@@ -3,6 +3,7 @@ package com.dhx.bi.config;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,14 +15,22 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RedissonConfig {
 
+    @Value("${spring.redis.host}")
+    private String host;
+
+    @Value("${spring.redis.port}")
+    private String port;
+
+    @Value("${spring.redis.password}")
+    private String password;
+
     @Bean
-    RedissonClient redissonClient() {
+    RedissonClient redissonClient(){
         Config config = new Config();
+//        config.setTransportMode(TransportMode.EPOLL); // 默认是NIO的方式
         config.useSingleServer()
-                .setAddress("redis://192.168.159.134:6379")
-                .setPassword("adorabled4")
-                .setDatabase(1);
+                //可以用"rediss://"来启用SSL连接，前缀必须是redis:// or rediss://
+                .setAddress("redis://"+ host+ ":"+port).setPassword(password);
         return Redisson.create(config);
     }
-
 }

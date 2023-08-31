@@ -1,26 +1,24 @@
-package com.dhx.bi.model.VO;
+package com.dhx.bi.model.DTO.user;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * @author adorabled4
- * @className UserBaseInfoVo
- * @date : 2023/05/04/ 16:20
+ * @className UserUpdateRequest
+ * @date : 2023/08/26/ 23:11
  **/
 @Data
-public class UserBaseInfoVo implements Serializable {
-
-    /**
-     * 用户id
-     */
-    private Long userId;
+public class UserUpdateRequest implements Serializable {
 
     /**
      * 昵称
      */
     private String userName;
+
 
     /**
      * 地址
@@ -43,10 +41,15 @@ public class UserBaseInfoVo implements Serializable {
     private String phone;
 
     /**
-     * 是否是管理员
+     * 邮箱
      */
-    private String userRole;
+    private String email;
 
+    /**
+     * 出生日期
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date birth;
 
     private static final long serialVersionUID = 1L;
 }

@@ -11,12 +11,14 @@ import javax.validation.constraints.Pattern;
  * @date : 2023/05/04/ 16:41
  **/
 @Data
-public class LoginRequest {
+public class LoginEmailRequest {
     /**
      * 4~16位 数字,大小写字母组成
      */
-    @Pattern(regexp = UserConstant.USER_NAME_REGEX,message = "用户名不符合规范")
-    private String userAccount;
+    @Pattern(regexp = UserConstant.EMAIL_REGEX, message = "邮箱不符合规范")
+    private String email;
+
+
 
 
     /**

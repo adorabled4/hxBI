@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# 排除日志
+logs
