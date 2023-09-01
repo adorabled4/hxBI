@@ -62,12 +62,12 @@ public class GenChartSync implements GenChartStrategy {
             // 分析结果
             String genResult = split[2].trim();
             // 更新数据到数据库
-            chartEntity.setGenChart(genChart);
-            chartEntity.setGenResult(genResult);
+//            chartEntity.setGenChart(genChart);
+//            chartEntity.setGenResult(genResult);
             chartEntity.setStatus(ChartStatusEnum.SUCCEED.getStatus());
             boolean save = chartService.updateById(chartEntity);
             ThrowUtils.throwIf(!save, ErrorCode.SYSTEM_ERROR, "图表保存失败!");
-            boolean syncResult = chartService.syncChart(chartEntity);
+            boolean syncResult = chartService.syncChart(chartEntity,genChart,genResult);
             ThrowUtils.throwIf(!syncResult, ErrorCode.SYSTEM_ERROR, "图表同步失败!");
             // 封装返回结果
             BiResponse biResponse = new BiResponse();

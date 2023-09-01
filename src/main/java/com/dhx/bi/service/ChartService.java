@@ -83,7 +83,7 @@ public interface ChartService extends IService<ChartEntity> {
      * @param chartEntity 表实体
      * @return boolean
      */
-    boolean syncChart(ChartEntity chartEntity);
+    boolean syncChart(ChartEntity chartEntity,String genChart ,String genResult);
 
     /**
      * 构建页面

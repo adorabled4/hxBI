@@ -91,11 +91,11 @@ public class GenChartThreadPool implements GenChartStrategy {
                 // 更新数据
                 ChartEntity updateChartResult = new ChartEntity();
                 updateChartResult.setId(chartEntity.getId());
-                updateChartResult.setGenChart(compressJson);
-                updateChartResult.setGenResult(genResult);
+//                updateChartResult.setGenChart(compressJson);
+//                updateChartResult.setGenResult(genResult);
                 updateChartResult.setStatus(ChartStatusEnum.SUCCEED.getStatus());
                 boolean updateGenResult = chartService.updateById(updateChartResult);
-                boolean syncResult = chartService.syncChart(chartEntity);
+                boolean syncResult = chartService.syncChart(chartEntity,genChart,genResult);
                 ThrowUtils.throwIf(!updateGenResult && syncResult, ErrorCode.SYSTEM_ERROR, "生成图表保存失败!");
                 try {
                     webSocketServer.sendMessage("您的[" + chartEntity.getName() + "]生成成功 , 前往 我的图表 进行查看",

@@ -96,11 +96,11 @@ public class BiMqMessageConsumer {
             // 更新数据
             ChartEntity updateChartResult = new ChartEntity();
             updateChartResult.setId(chartId);
-            updateChartResult.setGenChart(compressedChart);
-            updateChartResult.setGenResult(genResult);
+//            updateChartResult.setGenChart(compressedChart);
+//            updateChartResult.setGenResult(genResult);
             updateChartResult.setStatus(ChartStatusEnum.SUCCEED.getStatus());
             // 保存数据到MongoDB
-            boolean syncResult = chartService.syncChart(chartEntity);
+            boolean syncResult = chartService.syncChart(chartEntity,genChart,genResult);
             boolean updateGenResult = chartService.updateById(updateChartResult);
             ThrowUtils.throwIf(!(updateGenResult && syncResult), ErrorCode.SYSTEM_ERROR, "生成图表保存失败!");
         } catch (BusinessException e) {

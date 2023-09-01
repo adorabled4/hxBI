@@ -59,15 +59,15 @@ public class ChartEntity implements Serializable {
      */
     private String chartType;
 
-    /**
-     * 生成的图表数据
-     */
-    private String genChart;
-
-    /**
-     * 生成的分析结论
-     */
-    private String genResult;
+//    /**
+//     * 生成的图表数据
+//     */
+//    private String genChart;
+//
+//    /**
+//     * 生成的分析结论
+//     */
+//    private String genResult;
 
     /**
      * 创建时间
@@ -108,8 +108,6 @@ public class ChartEntity implements Serializable {
             && (this.getExecMessage() == null ? other.getExecMessage() == null : this.getExecMessage().equals(other.getExecMessage()))
             && (this.getChartData() == null ? other.getChartData() == null : this.getChartData().equals(other.getChartData()))
             && (this.getChartType() == null ? other.getChartType() == null : this.getChartType().equals(other.getChartType()))
-            && (this.getGenChart() == null ? other.getGenChart() == null : this.getGenChart().equals(other.getGenChart()))
-            && (this.getGenResult() == null ? other.getGenResult() == null : this.getGenResult().equals(other.getGenResult()))
             && (this.getCreateTime() == null ? other.getCreateTime() == null : this.getCreateTime().equals(other.getCreateTime()))
             && (this.getUpdateTime() == null ? other.getUpdateTime() == null : this.getUpdateTime().equals(other.getUpdateTime()))
             && (this.getIsDelete() == null ? other.getIsDelete() == null : this.getIsDelete().equals(other.getIsDelete()));
@@ -127,8 +125,6 @@ public class ChartEntity implements Serializable {
         result = prime * result + ((getExecMessage() == null) ? 0 : getExecMessage().hashCode());
         result = prime * result + ((getChartData() == null) ? 0 : getChartData().hashCode());
         result = prime * result + ((getChartType() == null) ? 0 : getChartType().hashCode());
-        result = prime * result + ((getGenChart() == null) ? 0 : getGenChart().hashCode());
-        result = prime * result + ((getGenResult() == null) ? 0 : getGenResult().hashCode());
         result = prime * result + ((getCreateTime() == null) ? 0 : getCreateTime().hashCode());
         result = prime * result + ((getUpdateTime() == null) ? 0 : getUpdateTime().hashCode());
         result = prime * result + ((getIsDelete() == null) ? 0 : getIsDelete().hashCode());
@@ -149,8 +145,6 @@ public class ChartEntity implements Serializable {
         sb.append(", execmessage=").append(execMessage);
         sb.append(", chartData=").append(chartData);
         sb.append(", chartType=").append(chartType);
-        sb.append(", genChart=").append(genChart);
-        sb.append(", genResult=").append(genResult);
         sb.append(", createTime=").append(createTime);
         sb.append(", updateTime=").append(updateTime);
         sb.append(", isDelete=").append(isDelete);

@@ -53,15 +53,15 @@ public class ChartUpdateRequest implements Serializable {
      */
     private String chartType;
 
-    /**
-     * 生成的图表数据
-     */
-    private String genChart;
-
-    /**
-     * 生成的分析结论
-     */
-    private String genResult;
+//    /**
+//     * 生成的图表数据
+//     */
+//    private String genChart;
+//
+//    /**
+//     * 生成的分析结论
+//     */
+//    private String genResult;
 
     /**
      * 创建时间

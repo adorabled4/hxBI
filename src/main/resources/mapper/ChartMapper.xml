@@ -13,8 +13,8 @@
             <result property="execMessage" column="execMessage" jdbcType="VARCHAR"/>
             <result property="chartData" column="chart_data" jdbcType="VARCHAR"/>
             <result property="chartType" column="chart_type" jdbcType="VARCHAR"/>
-            <result property="genChart" column="gen_chart" jdbcType="VARCHAR"/>
-            <result property="genResult" column="gen_result" jdbcType="VARCHAR"/>
+<!--            <result property="genChart" column="gen_chart" jdbcType="VARCHAR"/>-->
+<!--            <result property="genResult" column="gen_result" jdbcType="VARCHAR"/>-->
             <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
             <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
             <result property="isDelete" column="is_delete" jdbcType="TINYINT"/>
@@ -23,8 +23,8 @@
     <sql id="Base_Column_List">
         id,user_id,name,
         goal,status,exec_message,
-        chart_data,chart_type,gen_chart,
-        gen_result,create_time,update_time,
+        chart_data,chart_type,
+        create_time,update_time,
         is_delete
     </sql>
 </mapper>
