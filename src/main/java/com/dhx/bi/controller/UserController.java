@@ -5,6 +5,7 @@ import cn.hutool.core.util.RandomUtil;
 import com.dhx.bi.common.BaseResponse;
 import com.dhx.bi.common.ErrorCode;
 import com.dhx.bi.common.annotation.AuthCheck;
+import com.dhx.bi.common.annotation.SysLog;
 import com.dhx.bi.common.constant.RedisConstant;
 import com.dhx.bi.common.constant.UserConstant;
 import com.dhx.bi.common.exception.BusinessException;
@@ -58,6 +59,7 @@ public class UserController {
 
     @PostMapping("/login/email")
     @ApiOperation("用户登录-email")
+    @SysLog("用户登录-email")
     public BaseResponse login(@Valid @RequestBody LoginEmailRequest param, HttpServletRequest request) {
         if (param == null) {
             return ResultUtil.error(ErrorCode.PARAMS_ERROR);
@@ -72,6 +74,7 @@ public class UserController {
 
     @PostMapping("/login/email/quick")
     @ApiOperation("验证码快速登录-email")
+    @SysLog("验证码快速登录-email")
     public BaseResponse quickLogin(@Valid @RequestBody QuickLoginEmailRequest param) {
         if (param == null) {
             return ResultUtil.error(ErrorCode.PARAMS_ERROR);
@@ -85,6 +88,7 @@ public class UserController {
 
     @PostMapping("/register/email")
     @ApiOperation("用户注册-email")
+    @SysLog("用户注册-email")
     public BaseResponse registerByEmail(@Valid @RequestBody VerifyCodeRegisterRequest request) {
         if (request == null) {
             return ResultUtil.error(ErrorCode.PARAMS_ERROR);
@@ -110,6 +114,7 @@ public class UserController {
      * @return {@link BaseResponse}<{@link String}>
      */
     @GetMapping("/send/code")
+    @SysLog("发送验证码")
     public BaseResponse<String> sendVerifyCode(@RequestParam("email") String email) {
         // 校验
         if (!email.matches(UserConstant.EMAIL_REGEX)) {
@@ -146,6 +151,8 @@ public class UserController {
 
     @GetMapping("/list")
     @ApiOperation("获取用户列表")
+    @SysLog(value = "获取用户列表")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<List<UserVO>> getUserList(
             @RequestParam(value = "pageSize", defaultValue = "5") int pageSize,
             @RequestParam(value = "current", defaultValue = "1") int current) {
@@ -176,6 +183,7 @@ public class UserController {
 
     @PostMapping("/update")
     @ApiOperation("更新用户")
+    @SysLog("更新用户")
     public BaseResponse updateUserInfo(@RequestPart("file") MultipartFile multipartFile, UserUpdateRequest param) {
         if (multipartFile != null) {
             // 执行更新用户图像操作
