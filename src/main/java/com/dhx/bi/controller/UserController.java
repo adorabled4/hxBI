@@ -2,16 +2,12 @@ package com.dhx.bi.controller;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.RandomUtil;
-import com.aliyun.oss.OSSClient;
-import com.aliyun.oss.model.ObjectMetadata;
-import com.aliyun.oss.model.PutObjectResult;
 import com.dhx.bi.common.BaseResponse;
 import com.dhx.bi.common.ErrorCode;
 import com.dhx.bi.common.annotation.AuthCheck;
 import com.dhx.bi.common.constant.RedisConstant;
 import com.dhx.bi.common.constant.UserConstant;
 import com.dhx.bi.common.exception.BusinessException;
-import com.dhx.bi.config.OSSConfig;
 import com.dhx.bi.manager.OssManager;
 import com.dhx.bi.model.DO.UserEntity;
 import com.dhx.bi.model.DTO.FileUploadResult;
@@ -25,7 +21,6 @@ import com.dhx.bi.utils.ThrowUtils;
 import com.dhx.bi.utils.UserHolder;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -35,8 +30,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -78,7 +71,7 @@ public class UserController {
     }
 
     @PostMapping("/login/email/quick")
-    @ApiOperation("用户登录-email")
+    @ApiOperation("验证码快速登录-email")
     public BaseResponse quickLogin(@Valid @RequestBody QuickLoginEmailRequest param) {
         if (param == null) {
             return ResultUtil.error(ErrorCode.PARAMS_ERROR);

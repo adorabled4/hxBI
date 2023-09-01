@@ -15,6 +15,7 @@ import com.dhx.bi.model.DTO.JwtToken;
 import com.dhx.bi.model.DTO.user.UserDTO;
 import com.dhx.bi.model.DTO.user.VerifyCodeRegisterRequest;
 import com.dhx.bi.model.VO.UserVO;
+import com.dhx.bi.model.enums.UserRoleEnum;
 import com.dhx.bi.service.JwtTokensService;
 import com.dhx.bi.service.UserService;
 import com.dhx.bi.mapper.UserMapper;
@@ -50,7 +51,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity>
             //1. 获取的加密密码
             UserEntity user = query().eq("email", email).one();
             String handlerPassword = user.getUserPassword();
-
+            //1.1 检查用户的使用状态
+            if(user.getUserRole().equals(UserRoleEnum.BAN.getValue())){
+                return ResultUtil.error(ErrorCode.PARAMS_ERROR, "该用户已被禁用!");
+            }
             //2. 查询用户密码是否正确
             boolean checkpw = BCrypt.checkpw(password, handlerPassword);
             if (!checkpw) {
