@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dhx.bi.mapper.ChartLogMapper">
+
+    <resultMap id="BaseResultMap" type="com.dhx.bi.model.DO.ChartLogEntity">
+            <id property="logId" column="log_id" jdbcType="BIGINT"/>
+            <result property="userId" column="user_id" jdbcType="BIGINT"/>
+            <result property="chartId" column="chart_id" jdbcType="BIGINT"/>
+            <result property="result" column="result" jdbcType="VARCHAR"/>
+            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        log_id,user_id,chart_id,
+        result,create_time
+    </sql>
+</mapper>

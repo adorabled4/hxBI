@@ -8,6 +8,7 @@ import com.dhx.bi.common.exception.GenChartException;
 import com.dhx.bi.manager.AiManager;
 import com.dhx.bi.model.DO.ChartEntity;
 import com.dhx.bi.model.enums.ChartStatusEnum;
+import com.dhx.bi.service.ChartLogService;
 import com.dhx.bi.service.ChartService;
 import com.dhx.bi.utils.ChartUtil;
 import com.dhx.bi.utils.ThrowUtils;
@@ -49,6 +50,9 @@ public class BiMqMessageConsumer {
 
     @Resource
     WebSocketServer webSocketServer;
+
+    @Resource
+    ChartLogService logService;
 
     //    @RabbitListener(queues = BiMqConstant.BI_QUEUE_NAME, ackMode = "MANUAL")
     @RabbitListener(bindings = @QueueBinding(value = @Queue(name = BiMqConstant.BI_QUEUE_NAME), exchange = @Exchange(name = BiMqConstant.BI_EXCHANGE_NAME, type = ExchangeTypes.DIRECT), key = BiMqConstant.BI_ROUTING_KEY))
@@ -102,7 +106,9 @@ public class BiMqMessageConsumer {
             // 保存数据到MongoDB
             boolean syncResult = chartService.syncChart(chartEntity,genChart,genResult);
             boolean updateGenResult = chartService.updateById(updateChartResult);
-            ThrowUtils.throwIf(!(updateGenResult && syncResult), ErrorCode.SYSTEM_ERROR, "生成图表保存失败!");
+            ThrowUtils.throwIf(!(updateGenResult && syncResult), ErrorCode.SYSTEM_ERROR, "生成图表保存失败!");            // 记录生成日志
+            logService.recordLog(chartEntity);
+
         } catch (BusinessException e) {
             // reject
             channel.basicNack(deliverTag, false, false);
@@ -111,7 +117,7 @@ public class BiMqMessageConsumer {
             updateChartResult.setStatus(ChartStatusEnum.FAILED.getStatus());
             updateChartResult.setExecMessage(e.getDescription());
             boolean updateResult = chartService.updateById(updateChartResult);
-
+            logService.recordLog(chartEntity);
             if (!updateResult) {
                 log.info("更新图表FAILED状态信息失败 , chatId:{}", updateChartResult.getId());
             }

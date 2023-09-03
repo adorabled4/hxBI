@@ -8,11 +8,13 @@ import com.dhx.bi.manager.AiManager;
 import com.dhx.bi.model.DO.ChartEntity;
 import com.dhx.bi.model.DTO.chart.BiResponse;
 import com.dhx.bi.model.enums.ChartStatusEnum;
+import com.dhx.bi.service.ChartLogService;
 import com.dhx.bi.service.ChartService;
 import com.dhx.bi.service.GenChartStrategy;
 import com.dhx.bi.utils.ChartUtil;
 import com.dhx.bi.utils.ThrowUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.web.ConditionalOnEnabledResourceChain;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -34,6 +36,9 @@ public class GenChartSync implements GenChartStrategy {
 
     @Resource
     AiManager aiManager;
+
+    @Resource
+    ChartLogService logService;
 
     @Override
     public BiResponse executeGenChart(ChartEntity chartEntity) {
@@ -65,10 +70,13 @@ public class GenChartSync implements GenChartStrategy {
 //            chartEntity.setGenChart(genChart);
 //            chartEntity.setGenResult(genResult);
             chartEntity.setStatus(ChartStatusEnum.SUCCEED.getStatus());
+            genChart = ChartUtil.compressJson(genChart);
             boolean save = chartService.updateById(chartEntity);
             ThrowUtils.throwIf(!save, ErrorCode.SYSTEM_ERROR, "图表保存失败!");
             boolean syncResult = chartService.syncChart(chartEntity,genChart,genResult);
             ThrowUtils.throwIf(!syncResult, ErrorCode.SYSTEM_ERROR, "图表同步失败!");
+            // 记录生成日志
+            logService.recordLog(chartEntity);
             // 封装返回结果
             BiResponse biResponse = new BiResponse();
             biResponse.setGenChart(genChart);
@@ -82,6 +90,8 @@ public class GenChartSync implements GenChartStrategy {
             updateChartResult.setStatus(ChartStatusEnum.FAILED.getStatus());
             updateChartResult.setExecMessage(e.getDescription());
             boolean updateResult = chartService.updateById(updateChartResult);
+            // 记录生成日志
+            logService.recordLog(chartEntity);
             if (!updateResult) {
                 log.info("更新图表FAILED状态信息失败 , chatId:{}", updateChartResult.getId());
             }
