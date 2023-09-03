@@ -184,7 +184,7 @@ public class UserController {
     @PostMapping("/update")
     @ApiOperation("更新用户")
     @SysLog("更新用户")
-    public BaseResponse updateUserInfo(@RequestPart("file") MultipartFile multipartFile, UserUpdateRequest param) {
+    public BaseResponse updateUserInfo(@RequestPart(value = "file", required = false) MultipartFile multipartFile, UserUpdateRequest param) {
         if (multipartFile != null) {
             // 执行更新用户图像操作
             FileUploadResult result = ossManager.uploadImage(multipartFile);
@@ -245,7 +245,6 @@ public class UserController {
             throw new BusinessException(ErrorCode.FORBIDDEN_ERROR, "验证码错误!");
         }
     }
-
 
 
 }
