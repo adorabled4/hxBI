@@ -3,10 +3,13 @@ package com.dhx.bi.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.dhx.bi.model.DO.ChartEntity;
 import com.dhx.bi.model.DO.ChartLogEntity;
+import com.dhx.bi.model.DTO.ChartLogDTO;
 import com.dhx.bi.model.enums.ChartStatusEnum;
 import com.dhx.bi.service.ChartLogService;
 import com.dhx.bi.mapper.ChartLogMapper;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * @author dhx
@@ -30,6 +33,11 @@ public class ChartLogServiceImpl extends ServiceImpl<ChartLogMapper, ChartLogEnt
         }
         boolean save = save(chartLogEntity);
         return chartLogEntity.getLogId();
+    }
+
+    @Override
+    public List<ChartLogDTO> getLogs(Integer dayCount, Long userId) {
+        return  this.baseMapper.getLogs(dayCount,userId);
     }
 }
 

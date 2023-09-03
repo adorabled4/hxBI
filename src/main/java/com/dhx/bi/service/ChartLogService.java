@@ -3,6 +3,9 @@ package com.dhx.bi.service;
 import com.dhx.bi.model.DO.ChartEntity;
 import com.dhx.bi.model.DO.ChartLogEntity;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.dhx.bi.model.DTO.ChartLogDTO;
+
+import java.util.List;
 
 /**
  * @author dhx
@@ -17,4 +20,11 @@ public interface ChartLogService extends IService<ChartLogEntity> {
      * @param chartEntity
      */
     Long recordLog(ChartEntity chartEntity);
+
+    /**
+     * 获取过去 dayCount  天数的日志信息
+     * @param dayCount
+     * @return {@link List}<{@link ChartLogEntity}>
+     */
+    List<ChartLogDTO> getLogs(Integer dayCount, Long userId);
 }
