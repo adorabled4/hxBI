@@ -103,6 +103,7 @@ public class BiMqMessageConsumer {
 //            updateChartResult.setGenChart(compressedChart);
 //            updateChartResult.setGenResult(genResult);
             updateChartResult.setStatus(ChartStatusEnum.SUCCEED.getStatus());
+            chartEntity.setStatus(ChartStatusEnum.SUCCEED.getStatus());
             // 保存数据到MongoDB
             boolean syncResult = chartService.syncChart(chartEntity,genChart,genResult);
             boolean updateGenResult = chartService.updateById(updateChartResult);
