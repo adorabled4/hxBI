@@ -64,6 +64,7 @@ public class ChartServiceImpl extends ServiceImpl<ChartMapper, ChartEntity>
         if(charts.size()!=0){
             return updateDocument(chart);
         }else{
+            chart.setVersion(1);
             Chart save = chartRepository.save(chart);
             return true;
         }

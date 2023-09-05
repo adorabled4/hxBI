@@ -2,6 +2,7 @@ package com.dhx.bi.model.DTO.user;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import org.springframework.lang.Nullable;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -49,6 +50,7 @@ public class UserUpdateRequest implements Serializable {
      * 出生日期
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Nullable
     private Date birth;
 
     private static final long serialVersionUID = 1L;

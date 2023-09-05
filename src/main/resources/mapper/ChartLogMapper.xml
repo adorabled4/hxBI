@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dhx.bi.mapper.ChartLogMapper">
+    <resultMap id="BaseResultMap" type="com.dhx.bi.model.DO.ChartLogEntity">
+        <id property="logId" column="log_id" jdbcType="BIGINT"/>
+        <result property="userId" column="user_id" jdbcType="BIGINT"/>
+        <result property="chartId" column="chart_id" jdbcType="BIGINT"/>
+        <result property="result" column="result" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        log_id,user_id,chart_id,
+        result,create_time
+    </sql>
+
+    <resultMap id="chartLogDTO" type="com.dhx.bi.model.DTO.ChartLogDTO">
+        <result property="count" column="count" jdbcType="BIGINT"/>
+        <result property="result" column="result" jdbcType="VARCHAR"/>
+        <result property="createTime" column="day" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <select id="getLogs" resultMap="chartLogDTO">
+        SELECT DATE(create_time) AS day,
+               result,
+               COUNT(*)          AS count
+        FROM chart_logs
+        WHERE user_id = #{userId}
+          AND create_time >= DATE_SUB(CURDATE(), INTERVAL #{dayCount} DAY)
+        GROUP BY day, result;
+    </select>
+</mapper>

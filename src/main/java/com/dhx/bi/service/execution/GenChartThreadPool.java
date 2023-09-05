@@ -6,8 +6,10 @@ import com.dhx.bi.common.exception.BusinessException;
 import com.dhx.bi.common.exception.GenChartException;
 import com.dhx.bi.manager.AiManager;
 import com.dhx.bi.model.DO.ChartEntity;
+import com.dhx.bi.model.DO.ChartLogEntity;
 import com.dhx.bi.model.DTO.chart.BiResponse;
 import com.dhx.bi.model.enums.ChartStatusEnum;
+import com.dhx.bi.service.ChartLogService;
 import com.dhx.bi.service.ChartService;
 import com.dhx.bi.service.GenChartStrategy;
 import com.dhx.bi.utils.ChartUtil;
@@ -47,6 +49,8 @@ public class GenChartThreadPool implements GenChartStrategy {
     @Resource
     private ThreadPoolExecutor threadPoolExecutor;
 
+    @Resource
+    ChartLogService logService;
 
     @Override
     public BiResponse executeGenChart(ChartEntity chartEntity) {
@@ -95,8 +99,10 @@ public class GenChartThreadPool implements GenChartStrategy {
 //                updateChartResult.setGenResult(genResult);
                 updateChartResult.setStatus(ChartStatusEnum.SUCCEED.getStatus());
                 boolean updateGenResult = chartService.updateById(updateChartResult);
-                boolean syncResult = chartService.syncChart(chartEntity,genChart,genResult);
+                boolean syncResult = chartService.syncChart(chartEntity, genChart, genResult);
                 ThrowUtils.throwIf(!updateGenResult && syncResult, ErrorCode.SYSTEM_ERROR, "生成图表保存失败!");
+                // 记录调用结果
+                logService.recordLog(chartEntity);
                 try {
                     webSocketServer.sendMessage("您的[" + chartEntity.getName() + "]生成成功 , 前往 我的图表 进行查看",
                             new HashSet<>(Arrays.asList(chartEntity.getUserId().toString())));
@@ -111,6 +117,8 @@ public class GenChartThreadPool implements GenChartStrategy {
             updateChartResult.setStatus(ChartStatusEnum.FAILED.getStatus());
             updateChartResult.setExecMessage(e.getDescription());
             boolean updateResult = chartService.updateById(updateChartResult);
+            // 记录调用结果: 这里的recordLog不会与上面的冲突,如果上面的执行了那么图表的生成结果一定是成功,不会执行到这里
+            logService.recordLog(chartEntity);
             if (!updateResult) {
                 log.info("更新图表FAILED状态信息失败 , chatId:{}", updateChartResult.getId());
             }
