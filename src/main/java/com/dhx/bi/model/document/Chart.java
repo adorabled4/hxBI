@@ -1,5 +1,7 @@
 package com.dhx.bi.model.document;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Data;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -31,6 +33,7 @@ public class Chart {
      * 图表id
      */
     @Indexed
+    @JsonSerialize(using= ToStringSerializer.class)
     private Long chartId;
 
     /**

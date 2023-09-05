@@ -1,10 +1,9 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://8.130.79.173:3306/bi
+    url: jdbc:mysql://8.130.79.173:4234/bi?useUnicode=true&characterEncoding=utf-8&useSSL=true&&serverTimezone=Asia/Shanghai
     username: root
-    password: r324fhh2n3084brj2w
-
+    password: adorabled4
   redis:
     # Redis服务器连接端口
     host: 8.130.79.173
@@ -24,13 +23,16 @@ spring:
         max-idle: 10
         # 连接池中的最小空闲连接
         min-idle: 0
-
-template:
-  thread:
-    core-size: 4
-    max-size: 8
-    keep-alive-time: 10
-yuapi:
-  client:
-    access-key: 3s4a0scf557tvxndeup21unetan7ly1j
-    secret-key: q83o1vnlpd8urm3ha1g15r6tm3t701rp
+  rabbitmq:
+    host: 8.130.79.173
+    port: 5672
+    username: dhx
+    password: r324fhh2n3084brj2w
+    virtual-host: /
+  data:
+    mongodb:
+      host: 8.130.79.173
+      port: 27017
+      database: bi
+      username: root
+      password: root
