@@ -13,6 +13,7 @@ import com.dhx.bi.service.ChartService;
 import com.dhx.bi.mapper.ChartMapper;
 import com.dhx.bi.utils.SqlUtils;
 import com.dhx.bi.utils.UserHolder;
+import com.mongodb.client.result.DeleteResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -45,25 +46,25 @@ public class ChartServiceImpl extends ServiceImpl<ChartMapper, ChartEntity>
     public boolean saveDocument(Chart chart) {
         Long chartId = chart.getChartId();
         List<Chart> charts = chartRepository.findAllByChartId(chartId);
-        if(charts.size()!=0){
+        if (charts.size() != 0) {
             return updateDocument(chart);
-        }else{
+        } else {
             Chart save = chartRepository.save(chart);
             return true;
         }
     }
 
     @Override
-    public boolean syncChart(ChartEntity chartEntity,String genChart,String genResult) {
+    public boolean syncChart(ChartEntity chartEntity, String genChart, String genResult) {
         Chart chart = BeanUtil.copyProperties(chartEntity, Chart.class);
         chart.setGenChart(genChart);
         chart.setGenResult(genResult);
         chart.setChartId(chartEntity.getId());
         Long chartId = chart.getChartId();
         List<Chart> charts = chartRepository.findAllByChartId(chartId);
-        if(charts.size()!=0){
+        if (charts.size() != 0) {
             return updateDocument(chart);
-        }else{
+        } else {
             chart.setVersion(1);
             Chart save = chartRepository.save(chart);
             return true;
@@ -126,6 +127,7 @@ public class ChartServiceImpl extends ServiceImpl<ChartMapper, ChartEntity>
     @Override
     public Chart getChartByChartId(long chartId) {
         List<Chart> charts = chartRepository.findAllByChartId(chartId);
+        if (charts.size() == 0) return null;
         if (charts.size() == 1) {
             return charts.get(0);
         }
@@ -150,7 +152,7 @@ public class ChartServiceImpl extends ServiceImpl<ChartMapper, ChartEntity>
             chart.setVersion(Chart.DEFAULT_VERSION);
             long chartId = chart.getChartId();
             Query query = new Query();
-            query.addCriteria(Criteria.where("chatId").is(chartId));
+            query.addCriteria(Criteria.where("chartId").is(chartId));
             List<Chart> charts = mongoTemplate.find(query, Chart.class);
             // 是新的图表
             if (charts.size() == 0) {
@@ -169,7 +171,7 @@ public class ChartServiceImpl extends ServiceImpl<ChartMapper, ChartEntity>
     }
 
     @Override
-    public boolean deleteFromMongo(long id) {
+    public boolean deleteAllFromMongo(long id) {
         return chartRepository.deleteAllByChartId(id) != -1;
     }
 
@@ -248,6 +250,16 @@ public class ChartServiceImpl extends ServiceImpl<ChartMapper, ChartEntity>
         newPage.setCurrent(current);
         newPage.setRecords(chartVOS);
         return newPage;
+    }
+
+    @Override
+    public boolean deleteSingleFromMongo(long id, int version) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("chartId").is(id));
+        query.addCriteria(Criteria.where("version").is(version));
+        DeleteResult remove = mongoTemplate.remove(query, Chart.class);
+        // 按照前端的参数, 必定会存在一个对应的document , 如果没有就是删除失败了
+        return remove.getDeletedCount() == 1;
     }
 }
 

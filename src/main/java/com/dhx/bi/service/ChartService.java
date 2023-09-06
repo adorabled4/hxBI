@@ -64,7 +64,7 @@ public interface ChartService extends IService<ChartEntity> {
      * @param id id
      * @return boolean
      */
-    boolean deleteFromMongo(long id);
+    boolean deleteAllFromMongo(long id);
 
 
     /**
@@ -93,4 +93,11 @@ public interface ChartService extends IService<ChartEntity> {
      * @return {@link com.baomidou.mybatisplus.extension.plugins.pagination.Page}<{@link ChartVO}>
      */
     com.baomidou.mybatisplus.extension.plugins.pagination.Page<ChartVO> buildPage(com.baomidou.mybatisplus.extension.plugins.pagination.Page<ChartEntity> page, List<ChartVO> chartVOS);
+
+    /**
+     * 删除当前id对应的最新版本的document
+     * @param id
+     * @return boolean
+     */
+    boolean deleteSingleFromMongo(long id,int version);
 }
