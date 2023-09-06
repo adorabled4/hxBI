@@ -93,13 +93,10 @@ public class GenChartThreadPool implements GenChartStrategy {
                 String genResult = split[2].trim();
                 String compressJson = ChartUtil.compressJson(genChart);
                 // 更新数据
-                ChartEntity updateChartResult = new ChartEntity();
-                updateChartResult.setId(chartEntity.getId());
-//                updateChartResult.setGenChart(compressJson);
-//                updateChartResult.setGenResult(genResult);
-                updateChartResult.setStatus(ChartStatusEnum.SUCCEED.getStatus());
-                boolean updateGenResult = chartService.updateById(updateChartResult);
-                boolean syncResult = chartService.syncChart(chartEntity, genChart, genResult);
+                chartEntity.setStatus(ChartStatusEnum.SUCCEED.getStatus());
+                chartEntity.setStatus(ChartStatusEnum.SUCCEED.getStatus());
+                boolean updateGenResult = chartService.updateById(chartEntity);
+                boolean syncResult = chartService.syncChart(chartEntity, compressJson, genResult);
                 ThrowUtils.throwIf(!updateGenResult && syncResult, ErrorCode.SYSTEM_ERROR, "生成图表保存失败!");
                 // 记录调用结果
                 logService.recordLog(chartEntity);

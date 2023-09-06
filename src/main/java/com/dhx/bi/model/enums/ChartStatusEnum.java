@@ -12,29 +12,39 @@ public enum ChartStatusEnum {
     /**
      * 等待
      */
-    WAIT("wait"),
+    WAIT("wait","生成等待中"),
     /**
      * 运行
      */
-    RUNNING("running"),
+    RUNNING("running","正在执行生成..."),
     /**
      * 成功
      */
-    SUCCEED("succeed"),
+    SUCCEED("succeed","生成成功"),
     /**
      * 提起
      */
-    FAILED("failed");
+    FAILED("failed","图表生成失败");
     /**
      * 状态
      */
     final String status;
 
-    ChartStatusEnum(String status) {
+    /**
+     * 执行信息
+     */
+    String message;
+
+    ChartStatusEnum(String status, String msg) {
         this.status = status;
+        this.message = msg;
     }
 
     public String getStatus() {
         return status;
+    }
+
+    public String getMessage() {
+        return message;
     }
 }

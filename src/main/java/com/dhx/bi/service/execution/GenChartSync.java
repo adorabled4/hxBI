@@ -70,6 +70,8 @@ public class GenChartSync implements GenChartStrategy {
 //            chartEntity.setGenChart(genChart);
 //            chartEntity.setGenResult(genResult);
             chartEntity.setStatus(ChartStatusEnum.SUCCEED.getStatus());
+            chartEntity.setExecMessage(ChartStatusEnum.SUCCEED.getMessage());
+            chartEntity.setExecMessage("生成成功");
             genChart = ChartUtil.compressJson(genChart);
             boolean save = chartService.updateById(chartEntity);
             ThrowUtils.throwIf(!save, ErrorCode.SYSTEM_ERROR, "图表保存失败!");
