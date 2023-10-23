@@ -40,5 +40,5 @@ jobs:
       env:
         IMAGE_TAG: ${{ github.sha }} # 用于标记容器版本号
       run: |
-        docker build -t registry.cn-wulanchabu.aliyuncs.com/hxbi/hxbi-backend:$IMAGE_TAG .
-        docker push registry.cn-wulanchabu.aliyuncs.com/hxbi/hxbi-backend:$IMAGE_TAG
+        docker build -t registry.cn-hangzhou.aliyuncs.com/lietu_hxbi/hxbi:$IMAGE_TAG .
+        docker push registry.cn-hangzhou.aliyuncs.com/lietu_hxbi/hxbi:$IMAGE_TAG
