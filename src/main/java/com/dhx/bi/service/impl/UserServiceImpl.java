@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
  * @description 针对表【t_user】的数据库操作Service实现
  * @createDate 2023-05-04 16:18:15
  */
-@Service
+//@Service
 @Slf4j
 public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity>
         implements UserService {
@@ -52,7 +52,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity>
             UserEntity user = query().eq("email", email).one();
             String handlerPassword = user.getUserPassword();
             //1.1 检查用户的使用状态
-            if(user.getUserRole().equals(UserRoleEnum.BAN.getValue())){
+            if (user.getUserRole().equals(UserRoleEnum.BAN.getValue())) {
                 return ResultUtil.error(ErrorCode.PARAMS_ERROR, "该用户已被禁用!");
             }
             //2. 查询用户密码是否正确
@@ -187,6 +187,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserEntity>
         user.setEmail(email);
         boolean save = save(user);
         return save;
+    }
+    public boolean checkUserExists(String email) {
+        List<UserEntity> users = list(new QueryWrapper<UserEntity>().eq("email", email));
+        if (users == null || users.size() == 0) {
+            return false;
+        }
+        return true;
     }
 }
 
