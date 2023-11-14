@@ -10,5 +10,7 @@ import com.dhx.bi.common.BaseResponse;
 public interface Login3rdTarget {
 
 
-    BaseResponse loginByGitee(String code );
+    BaseResponse loginByGitee(String state,String code );
+
+    BaseResponse loginByGithub(String state,String code);
 }

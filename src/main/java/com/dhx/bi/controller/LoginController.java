@@ -22,8 +22,12 @@ public class LoginController {
     @Resource
     Login3rdAdapter login3rdAdapter;
     @GetMapping("/gitee/callback")
-    public BaseResponse loginByGitee(String code){
-        return login3rdAdapter.loginByGitee(code);
+    public BaseResponse loginByGitee(String code,String state){
+        return login3rdAdapter.loginByGitee(state,code);
     }
 
+    @GetMapping("/github/callback")
+    public BaseResponse loginByGithub(String code,String state){
+        return login3rdAdapter.loginByGithub(state,code);
+    }
 }
