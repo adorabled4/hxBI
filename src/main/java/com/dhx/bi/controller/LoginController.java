@@ -1,13 +1,14 @@
 package com.dhx.bi.controller;
 
 import com.dhx.bi.common.BaseResponse;
-import com.dhx.bi.service.impl.Login3rdAdapter;
+import com.dhx.bi.service.login3rd.AbstractRegisterLoginComponent;
+import com.dhx.bi.service.login3rd.factory.RegisterLoginComponentFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author adorabled4
@@ -19,15 +20,15 @@ import javax.annotation.Resource;
 @Slf4j
 public class LoginController {
 
-    @Resource
-    Login3rdAdapter login3rdAdapter;
     @GetMapping("/gitee/callback")
-    public BaseResponse loginByGitee(String code,String state){
-        return login3rdAdapter.loginByGitee(state,code);
+    public BaseResponse loginByGitee(HttpServletRequest httpServletRequest) {
+        AbstractRegisterLoginComponent gitee = RegisterLoginComponentFactory.getComponent("GITEE");
+        return gitee.login3rd(httpServletRequest);
     }
 
     @GetMapping("/github/callback")
-    public BaseResponse loginByGithub(String code,String state){
-        return login3rdAdapter.loginByGithub(state,code);
+    public BaseResponse loginByGithub(HttpServletRequest httpServletRequest) {
+        AbstractRegisterLoginComponent github = RegisterLoginComponentFactory.getComponent("GITHUB");
+        return github.login3rd(httpServletRequest);
     }
 }
