@@ -3,6 +3,8 @@ package com.dhx.bi.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dhx.bi.model.DO.ChartEntity;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.dhx.bi.model.DTO.ServerLoadInfo;
+import com.dhx.bi.model.DTO.chart.BiResponse;
 import com.dhx.bi.model.DTO.chart.ChartQueryRequest;
 import com.dhx.bi.model.VO.ChartVO;
 import com.dhx.bi.model.document.Chart;
@@ -100,4 +102,13 @@ public interface ChartService extends IService<ChartEntity> {
      * @return boolean
      */
     boolean deleteSingleFromMongo(long id,int version);
+
+    /**
+     * 通过AI生成图表
+     *
+     * @param chartEntity 表实体
+     * @param info        信息
+     * @return {@link BiResponse}
+     */
+    BiResponse genChart(ChartEntity chartEntity, ServerLoadInfo info);
 }

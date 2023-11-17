@@ -8,7 +8,6 @@ import com.dhx.bi.common.annotation.AuthCheck;
 import com.dhx.bi.common.constant.RedisConstant;
 import com.dhx.bi.common.constant.UserConstant;
 import com.dhx.bi.common.exception.BusinessException;
-import com.dhx.bi.manager.StrategySelector;
 import com.dhx.bi.model.DTO.DeleteChartDocRequest;
 import com.dhx.bi.model.DTO.ServerLoadInfo;
 import com.dhx.bi.model.DTO.user.UserDTO;
@@ -22,7 +21,6 @@ import com.dhx.bi.model.DTO.DeleteRequest;
 import com.dhx.bi.model.DTO.chart.*;
 import com.dhx.bi.model.enums.ChartStatusEnum;
 import com.dhx.bi.service.ChartService;
-import com.dhx.bi.service.GenChartStrategy;
 import com.dhx.bi.service.UserService;
 import com.dhx.bi.utils.*;
 import io.swagger.annotations.Api;
@@ -61,9 +59,6 @@ public class ChartController {
 
     @Resource
     private BiMqMessageProducer biMqMessageProducer;
-
-    @Resource
-    StrategySelector selector;
 
 
     @PostMapping("/list/chart/unsucceed")
@@ -169,10 +164,8 @@ public class ChartController {
         // 在这里选择执行的策略
         //1. 获取当前执行状态
         ServerLoadInfo info = ServerMetricsUtil.getLoadInfo();
-        //2. 获取执行策略
-        GenChartStrategy genChartStrategy = selector.selectStrategy(info);
-        //3. 执行生成图表
-        BiResponse biResponse = genChartStrategy.executeGenChart(chartEntity);
+        //2. 执行图表生成
+        BiResponse biResponse = chartService.genChart(chartEntity,info);
         if (StringUtils.isNotBlank(biResponse.getGenChart())) {
             return ResultUtil.success(biResponse);
         }

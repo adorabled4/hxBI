@@ -1,6 +1,7 @@
 package com.dhx.bi.model.DTO.user;
 
 import com.dhx.bi.common.constant.UserConstant;
+import lombok.Builder;
 import lombok.Data;
 
 import javax.validation.constraints.Pattern;
@@ -11,6 +12,7 @@ import javax.validation.constraints.Pattern;
  * @date : 2023/08/26/ 12:50
  **/
 @Data
+@Builder
 public class VerifyCodeRegisterRequest {
 
     /**

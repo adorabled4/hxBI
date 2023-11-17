@@ -4,13 +4,17 @@ import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.dhx.bi.common.constant.CommonConstant;
+import com.dhx.bi.manager.StrategySelector;
 import com.dhx.bi.model.DO.ChartEntity;
+import com.dhx.bi.model.DTO.ServerLoadInfo;
+import com.dhx.bi.model.DTO.chart.BiResponse;
 import com.dhx.bi.model.DTO.chart.ChartQueryRequest;
 import com.dhx.bi.model.VO.ChartVO;
 import com.dhx.bi.model.document.Chart;
 import com.dhx.bi.repository.ChartRepository;
 import com.dhx.bi.service.ChartService;
 import com.dhx.bi.mapper.ChartMapper;
+import com.dhx.bi.service.GenChartStrategy;
 import com.dhx.bi.utils.SqlUtils;
 import com.dhx.bi.utils.UserHolder;
 import com.mongodb.client.result.DeleteResult;
@@ -41,6 +45,9 @@ public class ChartServiceImpl extends ServiceImpl<ChartMapper, ChartEntity>
 
     @Resource
     MongoTemplate mongoTemplate;
+
+    @Resource
+    StrategySelector strategySelector;
 
     @Override
     public boolean saveDocument(Chart chart) {
@@ -260,6 +267,12 @@ public class ChartServiceImpl extends ServiceImpl<ChartMapper, ChartEntity>
         DeleteResult remove = mongoTemplate.remove(query, Chart.class);
         // 按照前端的参数, 必定会存在一个对应的document , 如果没有就是删除失败了
         return remove.getDeletedCount() == 1;
+    }
+
+    @Override
+    public BiResponse genChart(ChartEntity chartEntity, ServerLoadInfo info) {
+        GenChartStrategy genChartStrategy = strategySelector.selectStrategy(info);
+        return genChartStrategy.executeGenChart(chartEntity);
     }
 }
 
