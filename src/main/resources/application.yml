@@ -19,6 +19,15 @@ mybatis-plus:
   global-config:
     db-config:
       logic-not-delete-value: 0 # mybatis-plus 逻辑删除
+
+spark:
+  appId: 6681eae7
+  apiKey: 11111111111111111111111116a031
+  apiSecret: 11111111111111111111111NmYw
+  host: spark-api.xf-yun.com
+  path: /v3.1/chat
+  domain: generalv3
+
 knife4j:
   enable: true
   openapi:
