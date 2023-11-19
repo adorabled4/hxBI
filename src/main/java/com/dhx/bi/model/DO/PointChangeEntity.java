@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+import com.dhx.bi.model.enums.PointChangeEnum;
 import lombok.Data;
 
 /**
@@ -32,7 +33,7 @@ public class PointChangeEntity implements Serializable {
     /**
      * 积分变动类型：增加/减少
      */
-    private ChangeType changeType;
+    private PointChangeEnum.ChangeType changeType;
 
     /**
      * 变动原因
@@ -63,16 +64,22 @@ public class PointChangeEntity implements Serializable {
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 
+    public PointChangeEntity(PointChangeEnum pointChangeEnum, long userId) {
+        this.changeAmount = pointChangeEnum.getChangeAmount();
+        this.source = pointChangeEnum.getSource();
+        this.reason = pointChangeEnum.getReason();
+        this.createTime = LocalDateTime.now();
+        this.userId = userId;
+        this.changeType = pointChangeEnum.getChangeType();
+    }
+
     /**
      * 积分变更类型
      *
      * @author dhx
      * @date 2023/11/19
      */
-    public enum ChangeType {
-        INCREASE,
-        DECREASE
-    }
+
 
     @Override
     public boolean equals(Object that) {
