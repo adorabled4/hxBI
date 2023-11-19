@@ -20,4 +20,19 @@ public interface PointService extends IService<PointEntity> {
      */
     boolean checkAndDeduct(long userId , PointChangeEnum pointChangeEnum);
 
+    /**
+     * 获取每日登录积分
+     *
+     * @param userId 用户id
+     * @return boolean
+     */
+    boolean getDailyLoginPoint(Long userId);
+
+    /**
+     * 今天是否已经领取
+     *
+     * @param userId 用户id
+     * @return boolean
+     */
+    boolean isAlreadyGetted(Long userId);
 }

@@ -9,7 +9,7 @@
             <result property="userId" column="user_id" jdbcType="INTEGER"/>
             <result property="remainingPoints" column="remaining_points" jdbcType="INTEGER"/>
             <result property="totalPoints" column="total_points" jdbcType="INTEGER"/>
-            <result property="status" column="status" jdbcType="OTHER"/>
+            <result property="status" column="status" jdbcType="INTEGER"/>
             <result property="lastOperationTime" column="last_operation_time" jdbcType="TIMESTAMP"/>
             <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
             <result property="isDeleted" column="is_deleted" jdbcType="TINYINT"/>

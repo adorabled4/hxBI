@@ -5,10 +5,10 @@
 <mapper namespace="com.dhx.bi.mapper.PointChangeMapper">
 
     <resultMap id="BaseResultMap" type="com.dhx.bi.model.DO.PointChangeEntity">
-            <id property="id" column="id" jdbcType="INTEGER"/>
+            <id property="id" column="id" jdbcType="BIGINT"/>
             <result property="userId" column="user_id" jdbcType="BIGINT"/>
             <result property="changeAmount" column="change_amount" jdbcType="INTEGER"/>
-            <result property="changeType" column="change_type" jdbcType="OTHER"/>
+            <result property="changeType" column="change_type" jdbcType="TINYINT"/>
             <result property="reason" column="reason" jdbcType="VARCHAR"/>
             <result property="newPoints" column="new_points" jdbcType="INTEGER"/>
             <result property="source" column="source" jdbcType="VARCHAR"/>

@@ -37,7 +37,7 @@ public class PointEntity implements Serializable {
     /**
      * 积分状态：有效/过期
      */
-    private Status status;
+    private Integer status;
 
     /**
      * 最后操作时间

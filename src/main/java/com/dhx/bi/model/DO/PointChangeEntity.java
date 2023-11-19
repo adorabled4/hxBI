@@ -6,19 +6,23 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 import com.dhx.bi.model.enums.PointChangeEnum;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @TableName point_changes
  */
 @TableName(value = "point_changes")
 @Data
+@AllArgsConstructor // 如果自己新写了构造器, 一定要加上这个注解!!! , 否则查询sql返回构造对象的时候会用自己写的构造器
+@NoArgsConstructor
 public class PointChangeEntity implements Serializable {
     /**
      * 主键ID
      */
     @TableId(type = IdType.AUTO)
-    private Integer id;
+    private Long id;
 
     /**
      * 用户ID
@@ -33,7 +37,7 @@ public class PointChangeEntity implements Serializable {
     /**
      * 积分变动类型：增加/减少
      */
-    private PointChangeEnum.ChangeType changeType;
+    private Integer changeType;
 
     /**
      * 变动原因
@@ -70,7 +74,7 @@ public class PointChangeEntity implements Serializable {
         this.reason = pointChangeEnum.getReason();
         this.createTime = LocalDateTime.now();
         this.userId = userId;
-        this.changeType = pointChangeEnum.getChangeType();
+        this.changeType = pointChangeEnum.getChangeType().ordinal();
     }
 
     /**
