@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dhx.bi.mapper.PointMapper">
+
+    <resultMap id="BaseResultMap" type="com.dhx.bi.model.DO.PointEntity">
+            <id property="id" column="id" jdbcType="INTEGER"/>
+            <result property="userId" column="user_id" jdbcType="INTEGER"/>
+            <result property="remainingPoints" column="remaining_points" jdbcType="INTEGER"/>
+            <result property="totalPoints" column="total_points" jdbcType="INTEGER"/>
+            <result property="status" column="status" jdbcType="OTHER"/>
+            <result property="lastOperationTime" column="last_operation_time" jdbcType="TIMESTAMP"/>
+            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+            <result property="isDeleted" column="is_deleted" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,user_id,remaining_points,
+        total_points,status,last_operation_time,
+        create_time,is_deleted
+    </sql>
+</mapper>
