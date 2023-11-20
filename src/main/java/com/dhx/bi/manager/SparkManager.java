@@ -39,6 +39,7 @@ public class SparkManager {
         if (authUrl == null) {
             throw new RuntimeException("authUrl 生成失败 !");
         }
+        authUrl = authUrl.replace("https://", "wss://").replace("http://", "ws://");
         OkHttpClient client = new OkHttpClient.Builder().build();
         // 构建聊天请求
         ChatRequest chatRequest = buildChatRequest(userId, question);

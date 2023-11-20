@@ -8,13 +8,14 @@ import com.dhx.bi.manager.AiManager;
 import com.dhx.bi.model.DO.ChartEntity;
 import com.dhx.bi.model.DTO.chart.BiResponse;
 import com.dhx.bi.model.enums.ChartStatusEnum;
+import com.dhx.bi.model.enums.PointChangeEnum;
 import com.dhx.bi.service.ChartLogService;
 import com.dhx.bi.service.ChartService;
 import com.dhx.bi.service.GenChartStrategy;
+import com.dhx.bi.service.PointService;
 import com.dhx.bi.utils.ChartUtil;
 import com.dhx.bi.utils.ThrowUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.web.ConditionalOnEnabledResourceChain;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -40,6 +41,8 @@ public class GenChartSync implements GenChartStrategy {
     @Resource
     ChartLogService logService;
 
+    @Resource
+    PointService pointService;
     @Override
     public BiResponse executeGenChart(ChartEntity chartEntity) {
         // 系统预设 ( 简单预设 )
@@ -97,6 +100,7 @@ public class GenChartSync implements GenChartStrategy {
             if (!updateResult) {
                 log.info("更新图表FAILED状态信息失败 , chatId:{}", updateChartResult.getId());
             }
+            pointService.sendCompensateMessage(chartEntity.getUserId(), PointChangeEnum.GEN_CHART_FAILED_ADD);
             // 抛出异常进行日志打印
             throw new GenChartException(chartEntity.getId(), e);
         }

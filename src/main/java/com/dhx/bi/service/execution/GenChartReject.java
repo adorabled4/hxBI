@@ -19,6 +19,6 @@ public class GenChartReject implements GenChartStrategy {
 
     @Override
     public BiResponse executeGenChart(ChartEntity chartEntity) {
-        throw new BusinessException(ErrorCode.SYSTEM_ERROR, "服务器繁忙,请稍后重试!");
+        throw new BusinessException(ErrorCode.TOO_MANY_REQUEST, "服务器繁忙,请稍后重试!");
     }
 }
