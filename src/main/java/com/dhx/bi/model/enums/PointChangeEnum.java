@@ -11,6 +11,7 @@ public enum PointChangeEnum {
     DAILY_LOGIN_ADD("SYSTEM", 50, "每日登录奖励", ChangeType.INCREASE),
     CHAT_DEDUCT("SYSTEM", 2, "在线提问扣除", ChangeType.DECREASE),
     GEN_CHART_DEDUCT("SYSTEM", 5, "生成图表扣除", ChangeType.DECREASE),
+    GEN_CHART_FAILED_COMPENSATE("SYSTEM", 5, "生成图表失败补偿", ChangeType.DECREASE),
     GEN_CHART_FAILED_ADD("SYSTEM", 3, "生成图表失败补偿", ChangeType.DECREASE);
 
     /**

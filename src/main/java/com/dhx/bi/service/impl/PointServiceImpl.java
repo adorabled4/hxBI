@@ -1,8 +1,10 @@
 package com.dhx.bi.service.impl;
 
+import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.dhx.bi.common.ErrorCode;
+import com.dhx.bi.common.constant.BiMqConstant;
 import com.dhx.bi.model.DO.PointChangeEntity;
 import com.dhx.bi.model.DO.PointEntity;
 import com.dhx.bi.model.enums.PointChangeEnum;
@@ -10,6 +12,7 @@ import com.dhx.bi.service.PointChangeService;
 import com.dhx.bi.service.PointService;
 import com.dhx.bi.mapper.PointMapper;
 import com.dhx.bi.utils.ThrowUtils;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +33,9 @@ public class PointServiceImpl extends ServiceImpl<PointMapper, PointEntity>
     @Resource
     PointChangeService pointChangeService;
 
+    @Resource
+    RabbitTemplate rabbitTemplate;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean checkAndDeduct(long userId, PointChangeEnum pointChangeEnum) {
@@ -47,17 +53,29 @@ public class PointServiceImpl extends ServiceImpl<PointMapper, PointEntity>
     }
 
     @Override
+    public boolean compensatePoint(Long userId, PointChangeEnum pointChangeEnum) {
+        return operatePointAndSave(userId, pointChangeEnum);
+    }
+
+    @Override
+    public void sendCompensateMessage(Long userId, PointChangeEnum pointChangeEnum) {
+        rabbitTemplate.convertAndSend(BiMqConstant.BI_EXCHANGE_NAME, BiMqConstant.COMPENSATE_POINT_ROUTING_KEY,
+                new JSONObject().set("userId", userId).set("pointChangeEnum", pointChangeEnum));
+
+    }
+
+    @Override
     public boolean isAlreadyGetted(Long userId) {
         // 获取今天的日期
         LocalDate today = LocalDate.now();
         PointChangeEntity point = pointChangeService.getOne(
                 new QueryWrapper<PointChangeEntity>()
                         .eq("user_id", userId)
-                        .eq("reason",PointChangeEnum.DAILY_LOGIN_ADD.getReason())
+                        .eq("reason", PointChangeEnum.DAILY_LOGIN_ADD.getReason())
                         .ge("create_time", today.atStartOfDay())  // 大于等于今天的开始时间
                         .lt("create_time", today.plusDays(1).atStartOfDay())  // 小于今天的开始时间
         );
-        return point!=null;
+        return point != null;
     }
 
 

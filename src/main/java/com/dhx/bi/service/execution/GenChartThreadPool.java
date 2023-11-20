@@ -9,9 +9,11 @@ import com.dhx.bi.model.DO.ChartEntity;
 import com.dhx.bi.model.DO.ChartLogEntity;
 import com.dhx.bi.model.DTO.chart.BiResponse;
 import com.dhx.bi.model.enums.ChartStatusEnum;
+import com.dhx.bi.model.enums.PointChangeEnum;
 import com.dhx.bi.service.ChartLogService;
 import com.dhx.bi.service.ChartService;
 import com.dhx.bi.service.GenChartStrategy;
+import com.dhx.bi.service.PointService;
 import com.dhx.bi.utils.ChartUtil;
 import com.dhx.bi.utils.ThrowUtils;
 import com.dhx.bi.webSocket.WebSocketServer;
@@ -51,6 +53,9 @@ public class GenChartThreadPool implements GenChartStrategy {
 
     @Resource
     ChartLogService logService;
+
+    @Resource
+    PointService pointService;
 
     @Override
     public BiResponse executeGenChart(ChartEntity chartEntity) {
@@ -114,6 +119,8 @@ public class GenChartThreadPool implements GenChartStrategy {
             updateChartResult.setStatus(ChartStatusEnum.FAILED.getStatus());
             updateChartResult.setExecMessage(e.getDescription());
             boolean updateResult = chartService.updateById(updateChartResult);
+            // 补偿积分
+            pointService.sendCompensateMessage(chartEntity.getUserId(), PointChangeEnum.GEN_CHART_FAILED_ADD);
             // 记录调用结果: 这里的recordLog不会与上面的冲突,如果上面的执行了那么图表的生成结果一定是成功,不会执行到这里
             logService.recordLog(chartEntity);
             if (!updateResult) {

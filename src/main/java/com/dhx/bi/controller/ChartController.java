@@ -13,6 +13,7 @@ import com.dhx.bi.model.DTO.ServerLoadInfo;
 import com.dhx.bi.model.DTO.user.UserDTO;
 import com.dhx.bi.model.VO.ChartVO;
 import com.dhx.bi.model.document.Chart;
+import com.dhx.bi.model.enums.PointChangeEnum;
 import com.dhx.bi.mq.producer.BiMqMessageProducer;
 import com.dhx.bi.manager.RedisLimiterManager;
 import com.dhx.bi.model.DO.ChartEntity;
@@ -21,6 +22,7 @@ import com.dhx.bi.model.DTO.DeleteRequest;
 import com.dhx.bi.model.DTO.chart.*;
 import com.dhx.bi.model.enums.ChartStatusEnum;
 import com.dhx.bi.service.ChartService;
+import com.dhx.bi.service.PointService;
 import com.dhx.bi.service.UserService;
 import com.dhx.bi.utils.*;
 import io.swagger.annotations.Api;
@@ -60,6 +62,9 @@ public class ChartController {
     @Resource
     private BiMqMessageProducer biMqMessageProducer;
 
+
+    @Resource
+    PointService pointService;
 
     @PostMapping("/list/chart/unsucceed")
     @ApiOperation(value = "获取生成失败图表")
@@ -165,11 +170,21 @@ public class ChartController {
         //1. 获取当前执行状态
         ServerLoadInfo info = ServerMetricsUtil.getLoadInfo();
         //2. 执行图表生成
-        BiResponse biResponse = chartService.genChart(chartEntity,info);
-        if (StringUtils.isNotBlank(biResponse.getGenChart())) {
+        // 扣除对应的积分
+        pointService.checkAndDeduct(user.getUserId(), PointChangeEnum.CHAT_DEDUCT);
+        try{
+            BiResponse biResponse = chartService.genChart(chartEntity,info);
+            if (StringUtils.isNotBlank(biResponse.getGenChart())) {
+                return ResultUtil.success(biResponse);
+            }
             return ResultUtil.success(biResponse);
+        }catch (BusinessException businessException){
+            if(businessException.getCode() == ErrorCode.TOO_MANY_REQUEST.getCode()){
+                // 如果执行的是拒绝策略 , 那么退回扣除的积分
+                pointService.sendCompensateMessage(user.getUserId(),PointChangeEnum.GEN_CHART_FAILED_COMPENSATE);
+            }
+            throw businessException;
         }
-        return ResultUtil.success(biResponse);
     }
 
     /**

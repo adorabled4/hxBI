@@ -14,6 +14,10 @@ public class BiMqConstant {
 
     public static final String BI_ROUTING_KEY = "bi_route";
 
+    public static final String COMPENSATE_POINT_ROUTING_KEY = "compensate_point";
+
+    public static final String COMPENSATE_POINT_QUEUE_NAME = "compensate_point_queue";
+
     public static final String BI_EXCHANGE_NAME = "bi_exchange";
     public static final String BI_HOST = "192.168.159.134";
     public static final String BI_USERNAME = "dhx";
