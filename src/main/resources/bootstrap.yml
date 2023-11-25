@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: 'hxBI'
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      config:
+        server-addr: 192.168.159.134:8848
+        namespace: a497a40a-194c-495d-8e54-488113e4844a
+        group: ${spring.profiles.active}
+        file-extension: yml
+        prefix: application-${spring.profiles.active}
+        ext-config:
+          - data-id: common.properties
+            group: DEFAULT_GROUP
+            refresh: true
+server:
+  port: 6848
+  servlet:
+    context-path: /api

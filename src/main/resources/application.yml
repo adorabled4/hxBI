@@ -1,67 +1,7 @@
 spring:
-  profiles:
-    active: dev
   application:
-    name: hxBI
-  jackson:
-    serialization:
-      FAIL_ON_EMPTY_BEANS: false
-  mail:
-    host: smtp.163.com
-    port: 25
-    username: dhx2648466390@163.com
-    password: EZKPSTZYFQTQCOET # 授权码
+    name: 'hxBI'
 server:
   port: 6848
   servlet:
     context-path: /api
-mybatis-plus:
-  global-config:
-    db-config:
-      logic-not-delete-value: 0 # mybatis-plus 逻辑删除
-
-spark:
-  appId: 6681eae7
-  apiKey: 11111111111111111111111116a031
-  apiSecret: 11111111111111111111111NmYw
-  host: spark-api.xf-yun.com
-  path: /v3.1/chat
-  domain: generalv3
-
-knife4j:
-  enable: true
-  openapi:
-    title: hxBI_backend
-    description: 后端接口文档
-    email: dhx2648466390@163.com
-    concat: adorabled4
-    url: https://blog.dhx.icu
-    version: v4.0
-    license: Apache 2.0
-    license-url: https://blog.dhx.icu
-    terms-of-service-url: https://blog.dhx.icu
-    group:
-      dev:
-        group-name: 开发环境
-        api-rule: package
-        api-rule-resources:
-          - com.dhx.bi.controller
-      prod:
-        group-name: 线上环境
-        api-rule: package
-        api-rule-resources:
-          - com.dhx.bi.controller
-
-logging:
-  config: classpath:logback.xml # 日志配置文件
-
-template:
-  thread:
-    core-size: 20
-    max-size: 200
-    keep-alive-time: 10
-
-yuapi:
-  client:
-    access-key: 3s4a0scf557tvxndeup21unetan7ly1j
-    secret-key: q83o1vnlpd8urm3ha1g15r6tm3t701rp
