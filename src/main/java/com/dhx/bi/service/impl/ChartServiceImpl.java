@@ -21,6 +21,7 @@ import com.mongodb.client.result.DeleteResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.*;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -47,6 +48,7 @@ public class ChartServiceImpl extends ServiceImpl<ChartMapper, ChartEntity>
     MongoTemplate mongoTemplate;
 
     @Resource
+    @Lazy
     StrategySelector strategySelector;
 
     @Override
