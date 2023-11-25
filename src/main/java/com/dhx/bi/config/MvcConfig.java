@@ -38,6 +38,8 @@ public class MvcConfig implements WebMvcConfigurer {
                         "/**/register/**",
                         "/**/doc.html/**",
                         "/static/**",
+                        "/**/v3/api-docs/**",
+                        "/**/swagger-ui/**",
                         "/**/swagger-ui.html/**",
                         "/**/error",
                         "/**/test/**",
