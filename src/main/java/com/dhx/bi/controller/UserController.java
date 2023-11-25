@@ -20,8 +20,8 @@ import com.dhx.bi.service.UserService;
 import com.dhx.bi.utils.ResultUtil;
 import com.dhx.bi.utils.ThrowUtils;
 import com.dhx.bi.utils.UserHolder;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -42,7 +42,7 @@ import java.util.concurrent.TimeUnit;
  **/
 @RestController
 @RequestMapping("/user")
-@Api()
+@Tag(name = "用户控制层")
 public class UserController {
 
     @Autowired
@@ -58,7 +58,7 @@ public class UserController {
     OssManager ossManager;
 
     @PostMapping("/login/email")
-    @ApiOperation("用户登录-email")
+    @Operation(summary="用户登录-email")
     @SysLog("用户登录-email")
     public BaseResponse login(@Valid @RequestBody LoginEmailRequest param, HttpServletRequest request) {
         if (param == null) {
@@ -73,7 +73,7 @@ public class UserController {
     }
 
     @PostMapping("/login/email/quick")
-    @ApiOperation("验证码快速登录-email")
+    @Operation(summary="验证码快速登录-email")
     @SysLog("验证码快速登录-email")
     public BaseResponse quickLogin(@Valid @RequestBody QuickLoginEmailRequest param) {
         if (param == null) {
@@ -87,7 +87,7 @@ public class UserController {
     }
 
     @PostMapping("/register/email")
-    @ApiOperation("用户注册-email")
+    @Operation(summary="用户注册-email")
     @SysLog("用户注册-email")
     public BaseResponse registerByEmail(@Valid @RequestBody VerifyCodeRegisterRequest request) {
         if (request == null) {
@@ -140,7 +140,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    @ApiOperation("通过用户id获取用户信息")
+    @Operation(summary="通过用户id获取用户信息")
     public BaseResponse<UserVO> getUserById(@PathVariable("id") Long userId) {
         if (userId == null || userId < 0) {
             return ResultUtil.error(ErrorCode.PARAMS_ERROR);
@@ -150,7 +150,7 @@ public class UserController {
 
 
     @GetMapping("/list")
-    @ApiOperation("获取用户列表")
+    @Operation(summary="获取用户列表")
     @SysLog(value = "获取用户列表")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<List<UserVO>> getUserList(
@@ -161,7 +161,7 @@ public class UserController {
 
 
     @DeleteMapping("/{id}")
-    @ApiOperation("通过ID删除用户")
+    @Operation(summary="通过ID删除用户")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> deleteUserById(@PathVariable("id") Long userId) {
         if (userId == null || userId < 0) {
@@ -172,7 +172,7 @@ public class UserController {
 
 
     @PostMapping("/add")
-    @ApiOperation("添加用户")
+    @Operation(summary="添加用户")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse addUser(@RequestBody UserEntity userVO) {
         if (userVO == null) {
@@ -182,7 +182,7 @@ public class UserController {
     }
 
     @PostMapping("/update")
-    @ApiOperation("更新用户")
+    @Operation(summary="更新用户")
     @SysLog("更新用户")
     public BaseResponse updateUserInfo(@RequestPart(value = "file", required = false) MultipartFile multipartFile, UserUpdateRequest param) {
         if (multipartFile != null) {
@@ -204,7 +204,7 @@ public class UserController {
     }
 
     @GetMapping("/current")
-    @ApiOperation("获取当前用户信息")
+    @Operation(summary="获取当前用户信息")
     public BaseResponse<UserVO> currentUser() {
         UserDTO user = UserHolder.getUser();
         UserEntity userEntity = userService.getById(user.getUserId());

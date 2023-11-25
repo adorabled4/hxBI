@@ -25,8 +25,8 @@ import com.dhx.bi.service.ChartService;
 import com.dhx.bi.service.PointService;
 import com.dhx.bi.service.UserService;
 import com.dhx.bi.utils.*;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/chart")
 @RestController
 @Slf4j
-@Api
+@Tag(name = "图表控制层")
 public class ChartController {
 
     @Resource
@@ -67,7 +67,7 @@ public class ChartController {
     PointService pointService;
 
     @PostMapping("/list/chart/unsucceed")
-    @ApiOperation(value = "获取生成失败图表")
+    @Operation(summary = "获取生成失败图表")
     public BaseResponse<com.baomidou.mybatisplus.extension.plugins.pagination.Page> getUnsucceedChart(@RequestBody ChartQueryRequest chartQueryRequest) {
         if (chartQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -87,7 +87,7 @@ public class ChartController {
     }
 
     @PostMapping("/list/chart/all")
-    @ApiOperation(value = "获取所有图表")
+    @Operation(summary = "获取所有图表")
     public BaseResponse<com.baomidou.mybatisplus.extension.plugins.pagination.Page> getAllCharts(@RequestBody ChartQueryRequest chartQueryRequest) {
         if (chartQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -112,7 +112,7 @@ public class ChartController {
     }
 
     @GetMapping("/regen/chart")
-    @ApiOperation(value = "重新生成图表")
+    @Operation(summary = "重新生成图表")
     public BaseResponse<String> regenerateChart(@RequestParam("chartId") Long chartId) {
         // 取出数据
         ChartEntity chartEntity = chartService.getById(chartId);
@@ -138,7 +138,7 @@ public class ChartController {
      * @return {@link BaseResponse}<{@link BiResponse}>
      */
     @PostMapping("/gen/async/mq")
-    @ApiOperation(value = "通过ai生成图表")
+    @Operation(summary = "通过ai生成图表")
     public BaseResponse<BiResponse> genChartByAi(@RequestPart("file") MultipartFile multipartFile,
                                                  GenChartByAIRequest chartRequest) {
         // 1.save chat(Not Generated)
@@ -194,7 +194,7 @@ public class ChartController {
      * @return
      */
     @PostMapping("/add")
-    @ApiOperation(value = "添加图表实体")
+    @Operation(summary = "添加图表实体")
     public BaseResponse<Long> addChartEntity(@RequestBody ChartAddRequest chartAddRequest) {
         if (chartAddRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -217,7 +217,7 @@ public class ChartController {
      * @return
      */
     @PostMapping("/delete/doc")
-    @ApiOperation(value = "通过id删除图表")
+    @Operation(summary = "通过id删除图表")
     public BaseResponse<Boolean> deleteChartDocument(@RequestBody DeleteChartDocRequest deleteRequest, HttpServletRequest request) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -249,7 +249,7 @@ public class ChartController {
      * @return
      */
     @PostMapping("/delete/do")
-    @ApiOperation(value = "通过id删除图表")
+    @Operation(summary = "通过id删除图表")
     public BaseResponse<Boolean> deleteChartEntity(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -275,7 +275,7 @@ public class ChartController {
      * @return
      */
     @PostMapping("/update")
-    @ApiOperation(value = "更新图表实体内容")
+    @Operation(summary = "更新图表实体内容")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> updateChartEntity(@RequestBody ChartUpdateRequest chartUpdateRequest) {
         if (chartUpdateRequest == null || chartUpdateRequest.getId() <= 0) {
@@ -303,7 +303,7 @@ public class ChartController {
      * @return
      */
     @GetMapping("/get")
-    @ApiOperation(value = "通过chartId获取图表")
+    @Operation(summary = "通过chartId获取图表")
     public BaseResponse<Chart> getChartEntityById(long id) {
         if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -322,7 +322,7 @@ public class ChartController {
      * @return
      */
     @PostMapping("/list/page")
-    @ApiOperation(value = "获取图表列表")
+    @Operation(summary = "获取图表列表")
     public BaseResponse<Page<Chart>> listChartEntityByPage(@RequestBody ChartQueryRequest chartQueryRequest) {
         long size = chartQueryRequest.getPageSize();
         // 限制爬虫
@@ -338,7 +338,7 @@ public class ChartController {
      * @return
      */
     @PostMapping("/my/list/page")
-    @ApiOperation(value = "获取当前用户图表列表")
+    @Operation(summary = "获取当前用户图表列表")
     public BaseResponse<Page<Chart>> listMyChartEntityByPage(@RequestBody ChartQueryRequest chartQueryRequest) {
         if (chartQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -362,7 +362,7 @@ public class ChartController {
      * @return
      */
     @PostMapping("/edit")
-    @ApiOperation(value = "编辑图表实体类")
+    @Operation(summary = "编辑图表实体类")
     public BaseResponse<Boolean> editChartEntity(@RequestBody ChartEditRequest chartEditRequest) {
         if (chartEditRequest == null || chartEditRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
