@@ -2,11 +2,6 @@ spring:
   jackson:
     serialization:
       FAIL_ON_EMPTY_BEANS: false
-  mail:
-    host: smtp.163.com
-    port: 25
-    username: dhx2648466390@163.com
-    password: EZKPSTZYFQTQCOET # 授权码
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://192.168.159.134:3306/bi
@@ -52,15 +47,6 @@ mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 打印sql
 
-spark:
-  appId: 6681eae7
-  apiKey: 11111111111111111111111116a031
-  apiSecret: 11111111111111111111111NmYw
-  host: spark-api.xf-yun.com
-  path: /v3.1/chat
-  domain: generalv3
-
-
 # springdoc-openapi项目配置
 springdoc:
   swagger-ui:
@@ -72,32 +58,11 @@ springdoc:
   group-configs:
     - group: ${spring.profiles.active}
       paths-to-match: '/**'
-      packages-to-scan: com.dhx.bi
+      packages-to-scan: com.dhx.bi.controller
 knife4j:
   enable: true
   setting:
     language: zh_cn
-  openapi:
-    title: hxBI_backend
-    description: 后端接口文档
-    email: dhx2648466390@163.com
-    concat: adorabled4
-    url: https://blog.dhx.icu
-    version: v4.0
-    license: Apache 2.0
-    license-url: https://blog.dhx.icu
-    terms-of-service-url: https://blog.dhx.icu
-    group:
-      dev:
-        group-name: 开发环境
-        api-rule: package
-        api-rule-resources:
-          - com.dhx.bi.controller
-      prod:
-        group-name: 线上环境
-        api-rule: package
-        api-rule-resources:
-          - com.dhx.bi.controller
 
 logging:
   config: classpath:logback.xml # 日志配置文件
@@ -107,8 +72,3 @@ template:
     core-size: 20
     max-size: 200
     keep-alive-time: 10
-
-yuapi:
-  client:
-    access-key: 3s4a0scf557tvxndeup21unetan7ly1j
-    secret-key: q83o1vnlpd8urm3ha1g15r6tm3t701rp
