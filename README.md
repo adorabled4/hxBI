@@ -1,26 +1,82 @@
 # hxBI
 
-基于springboot以及ChatGPT接口的智能BI(Business Intelligence)项目 , 用户只需要输入分析诉求并导入XLS数据,  即可通过AI进行图表生成与数据分析 , 实现数据分析的降本增效。
+基于springboot以及ChatGPT接口的智能BI(Business Intelligence)项目 , 用户只需要输入分析诉求并导入XLS数据,
+即可通过AI进行图表生成与数据分析 , 实现数据分析的降本增效。
+
+> 由于服务器资源问题目前线上体验暂时无法使用
 
 线上地址 ： http://bi.dhx.icu
 
-测试用户: 
+测试用户:
 
 testuser@163.com
 adorabled4
 
 ## 版本信息
+
 包含了主要项的版本信息，更多内容请参考**pom.xml**
 
-| 项           | 版本   |
-| ------------ | ------ |
-| JDK          | 1.8    |
-| springboot   | 2.5.7  |
-| MySQL        | 5.7.32 |
-| Redis        | 6.2.6  |
-| Maven        | 3.8.6  |
-| Mybatis-plus | 3.5.3  |
-| MongoDB      | 7.0.1  |
+| 项          | 版本   |
+|------------|------|
+| JDK        | 1.8  |
+| MySQL      | 5.7.32 |
+| Redis      | 6.2.6 |
+| Maven      | 3.8.6 |
+| Mybatis-plus | 3.5.3 |
+| MongoDB    | 7.0.1 |
+| Springboot | 2.7.14 |
+| SpringCloud | 2021.0.7|
+| OpenAPI    | 3.0  |
+
+## 关于部分配置信息[必读!!!]
+
+为了避免部分隐私信息泄漏（比如密钥, 数据库配置），目前我通过Nacos作为配置中心来存储， 准备了一个`common.properties`
+用来存储部分的隐私信息 ,
+如果需要本地运行并且没有配置Nacos, 那么你需要
+
+关闭Nacos配置: 在`bootstrap.yml`中配置 `spring.cloud.nacos.config.enabled` 为false
+
+在项目中添加`application.properties`(如果已经有就不用) , 添加上如下的信息
+
+```properties
+# OSS
+alibaba.cloud.oss.endpoint=********************************
+alibaba.cloud.oss.bucket=**********
+alibaba.cloud.oss.domain=********************************
+alibaba.cloud.access-key=*******************************
+alibaba.cloud.secret-key=***********************************
+# gitee第三方
+gitee.clientId=************************************************
+gitee.clientSecret=*********************************************
+gitee.state=GITEE
+gitee.redirectUri=http://localhost:8000/user/login
+gitee.token.url=https://gitee.com/oauth/token?grant_type=authorization_code&client_id=${gitee.clientId}&redirect_uri=${gitee.redirectUri}&client_secret=${gitee.clientSecret}&code=
+gitee.user.url=https://gitee.com/api/v5/user?access_token=
+gitee.user.prefix=${gitee.state}
+# github第三方配置
+github.clientId=*************************
+github.clientSecret=***********************************
+github.state=GITHUB
+github.redirectUri=http://localhost:6848/api/login3rd/github/callback
+github.token.url=https://github.com/login/oauth/access_token?client_id=${github.clientId}&client_secret=${github.clientSecret}&redirect_uri=${github.redirectUri}&code=
+github.user.url=https://api.github.com/user
+github.user.prefix=${github.state}
+# 讯飞星火配置
+spark.appId=*************
+spark.apiKey=***********************
+spark.apiSecret=*************************
+spark.host=spark-api.xf-yun.com
+spark.path=/v3.1/chat
+spark.domain=generalv3
+##鱼聪明配置
+yuapi.client.access-key=3s*******************
+yuapi.client.secret-key=q*******************
+## STMP配置
+mail.host=smtp.163.com
+mail.port=25
+mail.username=********************
+mail.password=E*******************
+```
 
 ## 主要内容
 
@@ -31,9 +87,12 @@ adorabled4
 5. 通过**Docker**进行项目部署, 同时通过Github Actions实现**Docker镜像构建与推送到阿里云镜像仓库的自动化**
 6. 通过**WebSocket**进行图表生成结果的实时推送
 7. 通过阿里云**OSS**进行用户图表存储(主要是头像)
-8. 更改用户注册登录方式为**邮箱**
+8. 更改用户注册登录方式为**邮箱** + Oauth登录
 9. JWT + Redis**双Token单点登录**
 10. **Logback**日志配置以及基于**AOP**的日志处理
+11. 讯飞星火客户端 + Spring SseEmitter流式传输
+12. Knife4j + OpenAPI 3 接口文档
+13. 设计模式实践(适配器模式,桥接模式,门面模式,策略模式,工厂模式,观察者模式,代理模式等)
 
 项目地址 :
 
@@ -194,13 +253,13 @@ public class StrategySelector {
 
 ### 图表结果压缩
 
-我们在开发的过程中大多经常与JSON打交道,  那么常用的JSON网站大家应该都有印象
+我们在开发的过程中大多经常与JSON打交道, 那么常用的JSON网站大家应该都有印象
 
 <img src="http://oss.dhx.icu/dhx/image-20230831174722917.png" style="zoom:67%;" />
 
-图表生成的JSON数据中是有很多的**制表符**以及**空格**的  , 因此把这部分的空间省去可以极大地提高我们的空间利用效率
+图表生成的JSON数据中是有很多的**制表符**以及**空格**的 , 因此把这部分的空间省去可以极大地提高我们的空间利用效率
 
-原本想着找个开源库直接压缩,  但是在测试的过程中发现  , 由于Java语言本身的原因   , JSON中字段的双引号会被吞掉
+原本想着找个开源库直接压缩, 但是在测试的过程中发现 , 由于Java语言本身的原因 , JSON中字段的双引号会被吞掉
 
 举个例子
 
@@ -209,27 +268,34 @@ public class StrategySelector {
   "title": {
     "text": "资源消耗情况",
     "subtext": "数据来源：数据库"
-  },
+  }
 }
 ```
 
 在执行了压缩方法之后 , 就会变成下面这个样子
 
 ```json
-{title: {text: 资源消耗情况,subtext: 数据来源：数据库},}
+{
+  title: {
+    text: 资源消耗情况,
+    subtext: 数据来源
+    ：
+    数据库
+  }
+}
 ```
 
-压缩确实是压缩了,  但是前端已经无法解析这段JSON了 , 于是自己写了个正则替换 , 也能达到目的
+压缩确实是压缩了, 但是前端已经无法解析这段JSON了 , 于是自己写了个正则替换 , 也能达到目的
 
 > 关键在于替换掉 **制表符**以及大量的**空格** **换行符**
 
 ```java
-    public static String compressJson(String data) {
-        data = data.replaceAll("\t+", "");
-        data = data.replaceAll(" +", "");
-        data = data.replaceAll("\n+", "");
+    public static String compressJson(String data){
+        data=data.replaceAll("\t+","");
+        data=data.replaceAll(" +","");
+        data=data.replaceAll("\n+","");
         return data;
-    }
+        }
 ```
 
 效果
@@ -247,7 +313,11 @@ public class StrategySelector {
     }
   },
   "legend": {
-    "data": ["2020年", "2019年", "2018年"]
+    "data": [
+      "2020年",
+      "2019年",
+      "2018年"
+    ]
   },
   "grid": {
     "left": "3%",
@@ -257,11 +327,19 @@ public class StrategySelector {
   },
   "xAxis": {
     "type": "value",
-    "boundaryGap": [0, 0.01]
+    "boundaryGap": [
+      0,
+      0.01
+    ]
   },
   "yAxis": {
     "type": "category",
-    "data": ["平均每天能源消费量(万吨标准煤)", "平均每天煤炭消费量(万吨)", "平均每天焦炭消费量(万吨)", "平均每天原油消费量(万吨)"]
+    "data": [
+      "平均每天能源消费量(万吨标准煤)",
+      "平均每天煤炭消费量(万吨)",
+      "平均每天焦炭消费量(万吨)",
+      "平均每天原油消费量(万吨)"
+    ]
   },
   "series": [
     {
@@ -274,7 +352,12 @@ public class StrategySelector {
       "emphasis": {
         "focus": "series"
       },
-      "data": [1361.5, 1106.2, 132, 189.8]
+      "data": [
+        1361.5,
+        1106.2,
+        132,
+        189.8
+      ]
     },
     {
       "name": "2019年",
@@ -286,7 +369,12 @@ public class StrategySelector {
       "emphasis": {
         "focus": "series"
       },
-      "data": [1335.6, 1101.1, 127.2, 184.3]
+      "data": [
+        1335.6,
+        1101.1,
+        127.2,
+        184.3
+      ]
     },
     {
       "name": "2018年",
@@ -298,7 +386,12 @@ public class StrategySelector {
       "emphasis": {
         "focus": "series"
       },
-      "data": [1292.9, 1088.9, 119.8, 172.6]
+      "data": [
+        1292.9,
+        1088.9,
+        119.8,
+        172.6
+      ]
     }
   ]
 }
@@ -307,7 +400,110 @@ public class StrategySelector {
 结果
 
 ```json
-{"title":{"text":"资源消耗情况","subtext":"2020-2018"},"tooltip":{"trigger":"axis","axisPointer":{"type":"shadow"}},"legend":{"data":["平均每天能源消费量(万吨标准煤)","平均每天煤炭消费量(万吨)","平均每天焦炭消费量(万吨)","平均每天原油消费量(万吨)"]},"toolbox":{"show":true,"orient":"vertical","left":"right","top":"center","feature":{"mark":{"show":true},"dataView":{"show":true,"readOnly":false},"magicType":{"show":true,"type":["line","bar","stack","tiled"]},"restore":{"show":true},"saveAsImage":{"show":true}}},"xAxis":{"type":"category","data":["2020年","2019年","2018年"]},"yAxis":{"type":"value","name":"消费量(万吨)"},"series":[{"name":"平均每天能源消费量(万吨标准煤)","type":"bar","stack":"总量","data":[1361.5,1335.6,1292.9]},{"name":"平均每天煤炭消费量(万吨)","type":"bar","stack":"总量","data":[1106.2,1101.1,1088.9]},{"name":"平均每天焦炭消费量(万吨)","type":"bar","stack":"总量","data":[132,127.2,119.8]},{"name":"平均每天原油消费量(万吨)","type":"bar","stack":"总量","data":[189.8,184.3,172.6]}]}
+{
+  "title": {
+    "text": "资源消耗情况",
+    "subtext": "2020-2018"
+  },
+  "tooltip": {
+    "trigger": "axis",
+    "axisPointer": {
+      "type": "shadow"
+    }
+  },
+  "legend": {
+    "data": [
+      "平均每天能源消费量(万吨标准煤)",
+      "平均每天煤炭消费量(万吨)",
+      "平均每天焦炭消费量(万吨)",
+      "平均每天原油消费量(万吨)"
+    ]
+  },
+  "toolbox": {
+    "show": true,
+    "orient": "vertical",
+    "left": "right",
+    "top": "center",
+    "feature": {
+      "mark": {
+        "show": true
+      },
+      "dataView": {
+        "show": true,
+        "readOnly": false
+      },
+      "magicType": {
+        "show": true,
+        "type": [
+          "line",
+          "bar",
+          "stack",
+          "tiled"
+        ]
+      },
+      "restore": {
+        "show": true
+      },
+      "saveAsImage": {
+        "show": true
+      }
+    }
+  },
+  "xAxis": {
+    "type": "category",
+    "data": [
+      "2020年",
+      "2019年",
+      "2018年"
+    ]
+  },
+  "yAxis": {
+    "type": "value",
+    "name": "消费量(万吨)"
+  },
+  "series": [
+    {
+      "name": "平均每天能源消费量(万吨标准煤)",
+      "type": "bar",
+      "stack": "总量",
+      "data": [
+        1361.5,
+        1335.6,
+        1292.9
+      ]
+    },
+    {
+      "name": "平均每天煤炭消费量(万吨)",
+      "type": "bar",
+      "stack": "总量",
+      "data": [
+        1106.2,
+        1101.1,
+        1088.9
+      ]
+    },
+    {
+      "name": "平均每天焦炭消费量(万吨)",
+      "type": "bar",
+      "stack": "总量",
+      "data": [
+        132,
+        127.2,
+        119.8
+      ]
+    },
+    {
+      "name": "平均每天原油消费量(万吨)",
+      "type": "bar",
+      "stack": "总量",
+      "data": [
+        189.8,
+        184.3,
+        172.6
+      ]
+    }
+  ]
+}
 ```
 
 这段数据中空间占用从 2.66kb 减小到了1.67kb , 效果还是十分可观的
@@ -316,14 +512,14 @@ public class StrategySelector {
 
 ## 项目部署
 
-后端这里配置了workflow的自动化Docker镜像部署 ,  同时推送到阿里云的私有镜像仓库 
+后端这里配置了workflow的自动化Docker镜像部署 , 同时推送到阿里云的私有镜像仓库
 
-这里我专门编写了两篇文章来详细介绍部署的流程以及Github Actions的配置过程,  欢迎前往阅读: 
+这里我专门编写了两篇文章来详细介绍部署的流程以及Github Actions的配置过程, 欢迎前往阅读:
 
 - [GithubAction与阿里云镜像仓库自动化实现Docker镜像构建与推送 | dhx_'blog](https://blog.dhx.icu/2023/08/31/Linux/GithubAction与阿里云镜像仓库自动化实现Docker镜像构建与推送/)
 - [Docker部署Springboot+React项目 | dhx_'blog](https://blog.dhx.icu/2023/08/30/Linux/Docker部署Springboot+React项目/)
 
-如果你并不熟悉Docker  ,  那么建议你先阅读:
+如果你并不熟悉Docker , 那么建议你先阅读:
 
 - [docker常用容器部署命令总结 | dhx_'blog](https://blog.dhx.icu/2023/01/30/Linux/docker常用容器/)
 
@@ -335,9 +531,13 @@ public class StrategySelector {
 
 但是对于线上环境，往往会存在着许多注意不到的地方，对于线上环境，在部署的时候应当主要注意以下的几个问题
 
-1. **配置文件** ： 非常简单的例子 ，比如下图中的几个配置文件，一定要做出区分，比如数据库或其他配置是否是线上环境准备好的（包括但不限于访问路径，账户，密码以及其他的配置信息）。![](http://oss.dhx.icu/dhx/image-20230830174618161.png)
-2. **环境配置**：比如springboot项目中的`spring.profiles.active`, 如果我们是手动执行命令, 每次都需要去输入`--spring.profiles.active=prod`等参数, 对于像我这样手懒的同志非常的不友好, 好在Dockerfile可以帮助我们很好的解决这个问题。
-3. **安全性**:   比如防火墙配置、HTTPS 配置、认证和授权等(<u>对于腾讯云, 阿里云等云服务厂商, 一定要在服务器的安全组中去配置访问权限</u>)。
+1. **配置文件** ： 非常简单的例子
+   ，比如下图中的几个配置文件，一定要做出区分，比如数据库或其他配置是否是线上环境准备好的（包括但不限于访问路径，账户，密码以及其他的配置信息）。![](http://oss.dhx.icu/dhx/image-20230830174618161.png)
+2. **环境配置**：比如springboot项目中的`spring.profiles.active`, 如果我们是手动执行命令,
+   每次都需要去输入`--spring.profiles.active=prod`等参数, 对于像我这样手懒的同志非常的不友好,
+   好在Dockerfile可以帮助我们很好的解决这个问题。
+3. **安全性**:   比如防火墙配置、HTTPS 配置、认证和授权等(<u>对于腾讯云, 阿里云等云服务厂商,
+   一定要在服务器的安全组中去配置访问权限</u>)。
 
 有关其他常见容器的配置 , 请参考 [docker常用容器部署命令总结]()
 
@@ -350,20 +550,21 @@ public class StrategySelector {
 对于默认使用spring-initialer准备的项目或者是git clone的项目 , pom文件中一般都会配备` spring-boot-maven-plugin`的插件
 
 ```xml
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-        </plugins>
+
+<plugins>
+    <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+            <excludes>
+                <exclude>
+                    <groupId>org.projectlombok</groupId>
+                    <artifactId>lombok</artifactId>
+                </exclude>
+            </excludes>
+        </configuration>
+    </plugin>
+</plugins>
 ```
 
 在pom的build标签中我们可以自定义构建jar包时候的选项.
@@ -407,11 +608,12 @@ EXPOSE 6848
 CMD ["sh", "-c", "java -jar /app/hxBI/hxBI.jar --spring.profiles.active=prod"]
 ```
 
-其中必要的注释都已在上面给出 , 
+其中必要的注释都已在上面给出 ,
 
 关于`FROM openjdk:8-jdk-alpine`
 
-`FROM openjdk:8-jdk-alpine`：这条指令定义了基础镜像。它告诉 Docker 使用名为 `openjdk` 的镜像，并选择标签为 `8-jdk-alpine`，这意味着基础镜像是一个包含 OpenJDK 8 和 Alpine Linux 的镜像。Alpine Linux 是一个轻量级的 Linux 发行版。
+`FROM openjdk:8-jdk-alpine`：这条指令定义了基础镜像。它告诉 Docker 使用名为 `openjdk` 的镜像，并选择标签为 `8-jdk-alpine`
+，这意味着基础镜像是一个包含 OpenJDK 8 和 Alpine Linux 的镜像。Alpine Linux 是一个轻量级的 Linux 发行版。
 
 简单来讲 , 这一行代码就可以代替我们手动去完成
 
@@ -432,7 +634,8 @@ CMD ["sh", "-c", "java -jar /app/hxBI/hxBI.jar --spring.profiles.active=prod"]
 docker build [OPTIONS] PATH | URL | -
 ```
 
-其中，`OPTIONS` 是一些可选参数，`PATH` 是 Dockerfile 所在的路径。`URL` 表示可以从远程仓库中获取 Dockerfile，而 `-` 表示从标准输入中读取 Dockerfile。
+其中，`OPTIONS` 是一些可选参数，`PATH` 是 Dockerfile 所在的路径。`URL` 表示可以从远程仓库中获取 Dockerfile，而 `-`表示从标准输入中读取
+Dockerfile。
 
 常用的 `docker build` 参数包括：
 
@@ -501,7 +704,8 @@ hxBI.jar
 docker run [OPTIONS] IMAGE [COMMAND] [ARG...]
 ```
 
-其中，`OPTIONS` 是一些可选参数，`IMAGE` 是要运行的镜像名称或镜像 ID。`COMMAND` 表示容器启动后要执行的命令，`ARG...` 是传递给命令的参数。
+其中，`OPTIONS` 是一些可选参数，`IMAGE` 是要运行的镜像名称或镜像 ID。`COMMAND` 表示容器启动后要执行的命令，`ARG...`
+是传递给命令的参数。
 
 常用的 `docker run` 参数包括：
 
@@ -561,7 +765,7 @@ docker logs -t my-container
 
 当排除到错误之后, 我们可能会需要去删除容器以及镜像, 来重新构建
 
-这里使用`docker stop , docker rm  , docker rmi `命令
+这里使用`docker stop , docker rm , docker rmi `命令
 
 > rmi 顾名思义 , remove image( **删除镜像**)
 
@@ -584,7 +788,7 @@ docker rmi hxbi:v1;
 > 1. touch xxx.sh
 > 2. vi xxx.sh
 > 3. shift + insert 复制内容
-> 4. Esc ,  接着在命令行模式下输入 !wq 回车即可
+> 4. Esc , 接着在命令行模式下输入 !wq 回车即可
 
 创建容器
 
@@ -628,17 +832,18 @@ docker rmi hxbi:v1
 
 ![](http://oss.dhx.icu/dhx/image-20230830181809959.png)
 
-打包好的Dist目录下是一些静态的资源文件  ，我们只需要把它放入nginx中即可
+打包好的Dist目录下是一些静态的资源文件 ，我们只需要把它放入nginx中即可
 
 <img src="http://oss.dhx.icu/dhx/image-20230830182221002.png" style="zoom:67%;" />
 
 #### 下载Nginx
 
-> **如果你想用Docker去部署nginx容器** , 请参考 https://blog.dhx.icu/2023/01/30/Linux/docker%E5%B8%B8%E7%94%A8%E5%AE%B9%E5%99%A8/
+> **如果你想用Docker去部署nginx容器** ,
+> 请参考 https://blog.dhx.icu/2023/01/30/Linux/docker%E5%B8%B8%E7%94%A8%E5%AE%B9%E5%99%A8/
 
 在下载nginx之前, 建议先在服务器上安装宝塔面板 , 通过面板的UI去执行操作 , 十分方便快捷。
 
-宝塔安装命令 : 
+宝塔安装命令 :
 
 `if [ -f /usr/bin/curl ];then curl -sSO download.cnnbt.net/install_panel.sh;else wget -O install_panel.sh download.cnnbt.net/install_panel.sh;fi;bash install_panel.sh ed8484bec`
 
@@ -661,7 +866,7 @@ docker rmi hxbi:v1
 > - **A记录**
 > - 指向服务器的IP地址即可
 
-点击宝塔面板左侧 `文件`选项,  进入到站点的工作目录  ,  将我们dist目录下的静态资源文件上传到其中即可。
+点击宝塔面板左侧 `文件`选项, 进入到站点的工作目录 , 将我们dist目录下的静态资源文件上传到其中即可。
 
 <img src="http://oss.dhx.icu/dhx/image-20230830182356113.png" style="zoom:67%;" />
 
@@ -671,7 +876,8 @@ docker rmi hxbi:v1
 
 <img src="http://oss.dhx.icu/dhx/image-20230830182442419.png" style="zoom:67%;" />
 
-由于我们部署的是前后端分离的相面,  并且nginx本身处于安全考虑 , 原本的访问路径都会被替换到我们当前的前端的路径中 , 因此需要在nginx中配置反向代理.
+由于我们部署的是前后端分离的相面, 并且nginx本身处于安全考虑 , 原本的访问路径都会被替换到我们当前的前端的路径中 ,
+因此需要在nginx中配置反向代理.
 
 这里给出核心的配置
 
@@ -698,9 +904,10 @@ docker rmi hxbi:v1
 >
 > - 正向代理 : 比如我们平时使用的VPN , 是用户主动代理的, 就是正向代理
 >
-> - 反向代理 : 用户不知道的, 由服务提供者来设置的代理, 表面上用户访问的域名通过DNS解析到了某一台服务器的IP地址, 可实际上为用户提供服务的并不一定是这台机器(或者是端口) ,
->
->   那么也就是NGINX这里起到的作用 : 反向代理 , 我们也可以在这里做其他的操作, 比如负载均衡 , 黑白名单等等
+> - 反向代理 : 用户不知道的, 由服务提供者来设置的代理, 表面上用户访问的域名通过DNS解析到了某一台服务器的IP地址,
+    可实际上为用户提供服务的并不一定是这台机器(或者是端口) ,
+    >
+    >   那么也就是NGINX这里起到的作用 : 反向代理 , 我们也可以在这里做其他的操作, 比如负载均衡 , 黑白名单等等
 >
 > [Nginx配置反向代理，一篇搞定！ - 知乎 (zhihu.com)](https://zhuanlan.zhihu.com/p/451825018)
 
@@ -716,13 +923,9 @@ docker rmi hxbi:v1
 
 ![img](http://oss.dhx.icu/dhx/FqB8AS0JbjzW4rr0ehOp9sqwCauf.png)
 
-
-
 ![img](http://oss.dhx.icu/dhx/FtIhKynmuysMFDYmHriSX_fK5Wyl.png)
 
 ![](http://oss.dhx.icu/dhx/FgCTIzKGdKh5n0cFiomXAjBKMeEu.png)
-
-
 
 ![](http://oss.dhx.icu/dhx/Fh3d_UOvBI3VeNJU-pReyWoYcmeZ.png)
 
@@ -730,13 +933,9 @@ docker rmi hxbi:v1
 
 ![](http://oss.dhx.icu/dhx/FkF86JlBiPQts33pkhisb3yqi1f5.png)
 
-
-
 ![](http://oss.dhx.icu/dhx/FvFqwKbvP2kla0DyxZNMx9PPkZJe.png)
 
 ![](http://oss.dhx.icu/dhx/Fo28JVyLLXBmPkxTvMKGnqAKh08Z.png)
-
-
 
 ## 贡献
 
@@ -748,12 +947,14 @@ docker rmi hxbi:v1
 
 目前项目还有一些遗留的问题没有解决
 
-1. 前端部署到Nginx之后在填写生成图表的表单的时候上传文件显示错误(因为Nginx默认是禁止通过POST来访问静态资源的) , 不过在实际的测试过程中我发现后端是可以接收到文件的 (奇怪的bug)
-2. 目前还没有统计用户生成图表的调用结果等数据(我的想法是通过统计这个去实时的显示在个人中心页面中 , 使得可以更加直观的看到调用的结果)
-3. 前端有很多展示上的问题 : 比如部分页面没有loading  , 以及页面展示原始数据的方式并不一致
+1. 前端部署到Nginx之后在填写生成图表的表单的时候上传文件显示错误(因为Nginx默认是禁止通过POST来访问静态资源的) ,
+   不过在实际的测试过程中我发现后端是可以接收到文件的 (奇怪的bug)
+2. 目前还没有统计用户生成图表的调用结果等数据(我的想法是通过统计这个去实时的显示在个人中心页面中 ,
+   使得可以更加直观的看到调用的结果)
+3. 前端有很多展示上的问题 : 比如部分页面没有loading , 以及页面展示原始数据的方式并不一致
 4. 用户无法修改原始数据
-5. 虽然图表引入了版本号,  但是前端在展示的时候还是有问题 , Spring-data-MongoDB**分页查询返回了全部的元素数量**
-6. 后端通过java.util.managment包来获取服务器的负载  , 在测试的过程中发现**获取负载数据十分消耗时间**
+5. 虽然图表引入了版本号, 但是前端在展示的时候还是有问题 , Spring-data-MongoDB**分页查询返回了全部的元素数量**
+6. 后端通过java.util.managment包来获取服务器的负载 , 在测试的过程中发现**获取负载数据十分消耗时间**
 7. 执行拒绝策略没有对之后的图表进行处理(这里的想法是存入到Redis集合中 , 通过定时任务去再次生成)
 
 ## 许可证
